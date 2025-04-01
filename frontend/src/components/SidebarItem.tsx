@@ -1,57 +1,52 @@
 "use client";
 import { ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SidebarItem = ({ open, useIcon, title, link }: { open: boolean; useIcon: any; title: string; link: string }) => {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isActive = pathname === `/${link}`;
 
   return (
-    <ListItem key={title} disablePadding sx={{ display: "block" }} onClick={() => router.push(`/${link}`)}>
+    <ListItem
+      key={title}
+      disablePadding
+      sx={{
+        display: "block",
+        bgcolor: isActive ? "#FFC107" : "transparent", // Warna latar belakang jika aktif
+        // borderRadius: "8px",
+      }}
+      onClick={() => router.push(`/${link}`)}
+    >
       <ListItemButton
-        sx={[
-          {
-            minHeight: 48,
-            px: 2.5,
+        sx={{
+          minHeight: 48,
+          px: 2.5,
+          justifyContent: open ? "initial" : "center",
+          "&:hover": {
+            bgcolor: "#E0A800", // Warna saat hover
           },
-          open
-            ? {
-                justifyContent: "initial",
-              }
-            : {
-                justifyContent: "center",
-              },
-        ]}
+        }}
       >
         <ListItemIcon
-          sx={[
-            {
-              minWidth: 0,
-              justifyContent: "center",
-            },
-            open
-              ? {
-                  mr: 3,
-                }
-              : {
-                  mr: "auto",
-                },
-          ]}
+          sx={{
+            minWidth: 0,
+            justifyContent: "center",
+            mr: open ? 3 : "auto",
+            color: isActive ? "#000" : "inherit", // Ubah warna ikon jika aktif
+          }}
         >
           {useIcon}
         </ListItemIcon>
         <ListItemText
           primary={title}
-          sx={[
-            open
-              ? {
-                  opacity: 1,
-                }
-              : {
-                  opacity: 0,
-                },
-          ]}
+          sx={{
+            opacity: open ? 1 : 0,
+            color: isActive ? "#000" : "inherit", // Ubah warna teks jika aktif
+          }}
         />
       </ListItemButton>
     </ListItem>
