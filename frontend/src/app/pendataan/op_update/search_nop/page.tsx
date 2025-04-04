@@ -30,7 +30,6 @@ const SearchNOP = () => {
   const handleSubmit = () => {
     if (!validateNOP(nop)) {
       setError("Format NOP tidak valid!");
-      return;
     }
     router.push(`/pendataan/op_update/${rawNop}`);
   };
