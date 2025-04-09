@@ -1,105 +1,122 @@
-// import { useState, useEffect } from "react";
-// import { Grid2, TextField, Typography, Divider, Box } from "@mui/material";
-// import dynamic from "next/dynamic";
+import { Box, TextField, Typography, IconButton } from "@mui/material";
+import RoomIcon from "@mui/icons-material/Room";
+import { useEffect, useRef, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
-// // Dynamically import the Leaflet map to avoid SSR issues
-// const MapWithNoSSR = dynamic(() => import("./LeafletMap"), {
-//   ssr: false,
-// });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
 
-// const LocationForm = ({ nop }: { nop: string }) => {
-//   const [location, setLocation] = useState({
-//     latitude: "",
-//     longitude: "",
-//     address: "",
-//   });
-//   const [loading, setLoading] = useState(true);
+function RecenterMap({ position }: { position: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(position, map.getZoom());
+  }, [map, position]);
+  return null;
+}
 
-//   useEffect(() => {
-//     // Fetch existing location data based on NOP
-//     const fetchLocationData = async () => {
-//       try {
-//         // Replace with actual API call
-//         const response = await fetch(`/api/location/${nop}`);
-//         const data = await response.json();
-//         setLocation(data);
-//         setLoading(false);
-//       } catch (error) {
-//         console.error("Error fetching location data:", error);
-//         setLoading(false);
-//       }
-//     };
+const GeoInputWithMap = () => {
+  const [latitude, setLatitude] = useState(-3.05097867451981);
+  const [longitude, setLongitude] = useState(121.21379730308746);
+  const [position, setPosition] = useState<[number, number]>([latitude, longitude]);
+  const [isDraggable, setIsDraggable] = useState(false);
+  const [address, setAddress] = useState("Mosiaku, Kolaka Utara, Southeast Sulawesi, Indonesia");
 
-//     if (nop) {
-//       fetchLocationData();
-//     }
-//   }, [nop]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markerRef = useRef<any>(null);
 
-//   const handleLocationChange = (newLocation: any) => {
-//     setLocation(newLocation);
-//   };
+  const updateAddress = async (lat: number, lon: number) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+      const data = await res.json();
+      setAddress(data.display_name || "Alamat tidak ditemukan");
+    } catch (error) {
+      console.error("Gagal reverse geocoding:", error);
+    }
+  };
 
-//   const handleCoordinateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target;
-//     setLocation({ ...location, [name]: value });
+  const handleGeoTag = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation tidak didukung browser ini.");
+      return;
+    }
 
-//     // If both coordinates are filled, update the address (reverse geocode)
-//     if (name === "latitude" || name === "longitude") {
-//       if (location.latitude && location.longitude) {
-//         // Call reverse geocoding API here
-//         // For now, just set a mock address
-//         setLocation((prev) => ({
-//           ...prev,
-//           address: `Alamat untuk ${prev.latitude}, ${prev.longitude}`,
-//         }));
-//       }
-//     }
-//   };
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setLatitude(lat);
+        setLongitude(lng);
+        setPosition([lat, lng]);
+        await updateAddress(lat, lng);
+      },
+      () => alert("Gagal mendapatkan lokasi."),
+      { enableHighAccuracy: true }
+    );
+  };
 
-//   if (loading) {
-//     return <Typography>Loading location data...</Typography>;
-//   }
+  const toggleDraggable = () => {
+    setIsDraggable((prev) => !prev);
+  };
 
-//   return (
-//     <Grid2 container spacing={3} sx={{ mt: 2 }}>
-//       <Grid2 item xs={12}>
-//         <Typography variant="h6" gutterBottom>
-//           Lokasi Properti
-//         </Typography>
-//         <Divider />
-//       </Grid2>
+  const onMarkerDragEnd = async () => {
+    const marker = markerRef.current;
+    if (marker != null) {
+      const latlng = marker.getLatLng();
+      setLatitude(latlng.lat);
+      setLongitude(latlng.lng);
+      setPosition([latlng.lat, latlng.lng]);
+      await updateAddress(latlng.lat, latlng.lng);
+    }
+  };
 
-//       <Grid2 item xs={12} md={6}>
-//         <Box sx={{ height: "400px", width: "100%" }}>
-//           <MapWithNoSSR latitude={parseFloat(location.latitude) || -6.2088} longitude={parseFloat(location.longitude) || 106.8456} onLocationChange={handleLocationChange} />
-//         </Box>
-//       </Grid2>
+  return (
+    <Box sx={{ width: "100%" }} paddingX={4}>
+      <TextField disabled fullWidth label="Alamat" value={address} onChange={(e) => setAddress(e.target.value)} sx={{ mb: 2 }} />
 
-//       <Grid2 item xs={12} md={6}>
-//         <Grid2 container spacing={2}>
-//           <Grid2 item xs={12} md={6}>
-//             <TextField fullWidth label="Latitude" name="latitude" value={location.latitude || ""} onChange={handleCoordinateChange} />
-//           </Grid2>
-//           <Grid2 item xs={12} md={6}>
-//             <TextField fullWidth label="Longitude" name="longitude" value={location.longitude || ""} onChange={handleCoordinateChange} />
-//           </Grid2>
-//           <Grid2 item xs={12}>
-//             <TextField
-//               fullWidth
-//               label="Alamat"
-//               name="address"
-//               value={location.address || ""}
-//               InputProps={{
-//                 readOnly: true,
-//               }}
-//               multiline
-//               rows={4}
-//             />
-//           </Grid2>
-//         </Grid2>
-//       </Grid2>
-//     </Grid2>
-//   );
-// };
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          gap: 2,
+          alignItems: "flex-start",
+          mb: 1,
+        }}
+      >
+        <TextField fullWidth label="Latitude" value={latitude} onChange={(e) => setLatitude(parseFloat(e.target.value))} />
+        <TextField fullWidth label="Longitude" value={longitude} onChange={(e) => setLongitude(parseFloat(e.target.value))} />
+      </Box>
+      <IconButton color="error" onClick={handleGeoTag} sx={{ alignSelf: { xs: "flex-start", sm: "center" } }}>
+        <RoomIcon />
+      </IconButton>
 
-// export default LocationForm;
+      <Typography variant="body2" sx={{ mb: 2, color: "red" }}>
+        Meskipun ada fitur <strong>Geo Location</strong>, tapi pastikan lagi titik lokasinya dengan benar.
+      </Typography>
+
+      <Box sx={{ height: 500, width: "100%", borderRadius: 2, overflow: "hidden" }}>
+        <MapContainer center={position} zoom={18} style={{ height: "100%", width: "100%" }}>
+          <TileLayer url="https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}" subdomains={["mt0", "mt1", "mt2", "mt3"]} />
+          <RecenterMap position={position} />
+          <Marker
+            position={position}
+            draggable={isDraggable}
+            eventHandlers={{
+              click: toggleDraggable,
+              dragend: onMarkerDragEnd,
+            }}
+            ref={markerRef}
+          />
+        </MapContainer>
+      </Box>
+    </Box>
+  );
+};
+
+export default GeoInputWithMap;
