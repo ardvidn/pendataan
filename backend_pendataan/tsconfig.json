@@ -114,6 +114,7 @@
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

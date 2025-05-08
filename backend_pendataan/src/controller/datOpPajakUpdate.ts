@@ -8,7 +8,6 @@ import { LogDatOpPajak } from "../entity/logDatOpPajak";
 import { LogDatOpBangunan } from "../entity/logDatOpBangunan";
 import { LogWajibPajak } from "../entity/logWajibPajak";
 import { formatNop } from "../utils/formatNOP";
-import { body } from "express-validator";
 import {
   atapBangunanOptions,
   dindingBangunanOptions,

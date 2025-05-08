@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+const { body } = require("express-validator");
 
 // Validasi untuk Register
 export const validateRegister = [
