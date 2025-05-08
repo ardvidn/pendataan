@@ -77,7 +77,7 @@ export const login = async (req: Request, res: Response) => {
     // 🔹 Simpan token di cookies (HttpOnly + Secure)
     res.cookie("user-cookies", token, {
       httpOnly: true, // Mencegah akses dari JavaScript
-      secure: process.env.NODE_ENV === "production", // Aktifkan hanya di HTTPS
+      secure: true, // Aktifkan hanya di HTTPS
       sameSite: "none",
       expires: dayjs().add(1, "day").toDate(),
     });
