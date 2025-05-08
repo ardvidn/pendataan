@@ -1,6 +1,6 @@
-import { checkDatOpPajakExist, getDatOpPajakUpdate, getDatOpPajakUpdateByNOP, getDatOpPajakUpdateBySearch } from "@/controller/datOpPajakUpdate";
-import { GetFotoPersil } from "@/controller/handleImage";
-import { getKodeKabupaten, getKodeKecamatan, getKodeKelurahan, getKodeProvinsi } from "@/controller/kodeWilayah";
+import { checkDatOpPajakExist, getDatOpPajakUpdate, getDatOpPajakUpdateByNOP, getDatOpPajakUpdateBySearch } from "../controller/datOpPajakUpdate";
+import { GetFotoPersil } from "../controller/handleImage";
+import { getKodeKabupaten, getKodeKecamatan, getKodeKelurahan, getKodeProvinsi } from "../controller/kodeWilayah";
 import { Router } from "express";
 
 const getRouter = Router();

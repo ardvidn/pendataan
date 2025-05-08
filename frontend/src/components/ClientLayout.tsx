@@ -1,38 +1,11 @@
-// "use client";
-
-// import React, { useState } from "react";
-// import Sidebar from "@/components/Sidebar";
-// import { Box } from "@mui/material";
-
-// export default function ClientLayout({ children }: { children: React.ReactNode }) {
-//   const [open, setOpen] = useState(false); // State untuk sidebar buka/tutup
-
-//   return (
-//     <Box sx={{ display: "flex", minHeight: "100tvh" }}>
-//       <Sidebar open={open} setOpen={setOpen} /> {/* Kirim state ke Sidebar */}
-//       <Box
-//         component="main"
-//         sx={{
-//           flexGrow: 1,
-//           transition: "margin 0.3s ease",
-//           marginLeft: "10px", // Sesuaikan dengan width Sidebar
-//           padding: "16px",
-//         }}
-//       >
-//         {children}
-//       </Box>
-//     </Box>
-//   );
-// }
-
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "../components/Sidebar";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import axios from "axios";
 import { usePathname, useRouter } from "next/navigation";
-import { logged } from "@/utils/interface";
+import { logged } from "../utils/interface";
 import MobileNavbar from "./MobileNavbar";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {

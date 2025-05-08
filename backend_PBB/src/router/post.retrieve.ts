@@ -1,4 +1,4 @@
-import { getAllDatObjekPajak } from "@/controller/getDatObjekPajak";
+import { getAllDatObjekPajak } from "../controller/getDatObjekPajak";
 import { Router } from "express";
 
 const postRouter = Router();

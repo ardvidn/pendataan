@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isMaxDigitsValid, isTeleponValid } from "@/utils/FormatForm";
-import { jenisBadanUsahaOptions, jenisIdentitasOptions, jenisKelaminOptions, jenisWpOptions, pekerjaanOptions } from "@/utils/labelData";
+import { isMaxDigitsValid, isTeleponValid } from "../../utils/FormatForm";
+import { jenisBadanUsahaOptions, jenisIdentitasOptions, jenisKelaminOptions, jenisWpOptions, pekerjaanOptions } from "../../utils/labelData";
 import { Autocomplete, Box, Divider, TextField, Typography } from "@mui/material";
 import React from "react";
 import UploadFotoPersilBox from "../uploadImage";
-import { getValueByKey } from "@/utils/optionsHelper";
+import { getValueByKey } from "../../utils/optionsHelper";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";

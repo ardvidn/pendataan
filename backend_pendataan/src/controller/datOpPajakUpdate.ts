@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "@/data-resource";
-import { DatOpPajak } from "@/entity/datOpPajak";
+import { AppDataSource } from "../data-resource";
+import { DatOpPajak } from "../entity/datOpPajak";
 import { v7 as uuidv7 } from "uuid";
-import { DatOpBangunan } from "@/entity/datOpBangunan";
-import { WajibPajak } from "@/entity/wajibPajak";
-import { LogDatOpPajak } from "@/entity/logDatOpPajak";
-import { LogDatOpBangunan } from "@/entity/logDatOpBangunan";
-import { LogWajibPajak } from "@/entity/logWajibPajak";
-import { formatNop } from "@/utils/formatNOP";
+import { DatOpBangunan } from "../entity/datOpBangunan";
+import { WajibPajak } from "../entity/wajibPajak";
+import { LogDatOpPajak } from "../entity/logDatOpPajak";
+import { LogDatOpBangunan } from "../entity/logDatOpBangunan";
+import { LogWajibPajak } from "../entity/logWajibPajak";
+import { formatNop } from "../utils/formatNOP";
 import { body } from "express-validator";
 import {
   atapBangunanOptions,
@@ -23,11 +23,11 @@ import {
   langitLangitBangunanOptions,
   lantaiBangunanOptions,
   pekerjaanOptions,
-} from "@/utils/labelData";
-import { kodeProvinsi } from "@/entity/kodeProvinsi";
-import { kodeKabupaten } from "@/entity/kodeKabupaten";
-import { kodeKecamatan } from "@/entity/kodeKecamatan";
-import { kodeKelurahan } from "@/entity/kodeKelurahan";
+} from "../utils/labelData";
+import { kodeProvinsi } from "../entity/kodeProvinsi";
+import { kodeKabupaten } from "../entity/kodeKabupaten";
+import { kodeKecamatan } from "../entity/kodeKecamatan";
+import { kodeKelurahan } from "../entity/kodeKelurahan";
 
 const datOpPajakRepository = AppDataSource.getRepository(DatOpPajak);
 const datOpBangunanRepository = AppDataSource.getRepository(DatOpBangunan);

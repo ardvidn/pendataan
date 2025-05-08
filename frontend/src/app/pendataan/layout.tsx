@@ -1,4 +1,4 @@
-import ClientLayout from "@/components/ClientLayout";
+import ClientLayout from "../../components/ClientLayout";
 
 import { Geist, Geist_Mono } from "next/font/google";
 const geistSans = Geist({

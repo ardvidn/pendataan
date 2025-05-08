@@ -8,11 +8,11 @@ import axios from "axios";
 import moment from "moment";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { formatNop } from "@/utils/formatNOP";
-import { validateNOP } from "@/utils/validateNOP";
+import { formatNop } from "../../../utils/formatNOP";
+import { validateNOP } from "../../../utils/validateNOP";
 import { useRouter } from "next/navigation";
-import { getJenisBumiLabel } from "@/utils/labelData";
-import { formatRibuan } from "@/utils/FormatForm";
+import { getJenisBumiLabel } from "../../../utils/labelData";
+import { formatRibuan } from "../../../utils/FormatForm";
 import toast, { Toaster } from "react-hot-toast";
 
 interface dataProps {

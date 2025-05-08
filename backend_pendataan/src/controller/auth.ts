@@ -1,10 +1,10 @@
-import { AppDataSource } from "@/data-resource";
-import { userAccount } from "@/entity/userAccount";
+import { AppDataSource } from "../data-resource";
+import { userAccount } from "../entity/userAccount";
 import { Request, Response } from "express";
-import { hashPassword, comparePassword } from "@/utils/hash";
-import { generateToken, verifyToken } from "@/utils/jwt";
+import { hashPassword, comparePassword } from "../utils/hash";
+import { generateToken, verifyToken } from "../utils/jwt";
 import { jwtDecode } from "jwt-decode";
-import { accountRole } from "@/entity/accountRole";
+import { accountRole } from "../entity/accountRole";
 import dayjs from "dayjs";
 
 export interface jwtPayload {

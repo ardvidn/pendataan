@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { RefKecamatan } from "../entity/RefKecamatan";
 import { RefKelurahan } from "../entity/RefKelurahan";
-import { AppDataSource } from "@/data-resource";
+import { AppDataSource } from "../data-resource";
 
 export const getKodeKecamatan = async (req: Request, res: Response) => {
   try {

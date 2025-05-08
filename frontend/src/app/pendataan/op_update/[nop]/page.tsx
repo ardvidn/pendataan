@@ -1,17 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import GeoInputWithMap from "@/components/LocationForm";
-import { LSPOPForm } from "@/components/LSPOP/LSPOPForm";
-import { SPOPForm } from "@/components/SPOPForm";
+import GeoInputWithMap from "../../../../components/LocationForm";
+import { LSPOPForm } from "../../../../components/LSPOP/LSPOPForm";
+import { SPOPForm } from "../../../../components/SPOPForm";
 import { Box, Step, StepLabel, Stepper, Button, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useSearchParams } from "next/navigation";
-import { preparePayload } from "@/utils/FormPayload";
+import { preparePayload } from "../../../../utils/FormPayload";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { logged, ResponseData } from "@/utils/interface";
+import { logged, ResponseData } from "../../../../utils/interface";
 
 const steps = ["SPOP", "LSPOP", "Lokasi"];
 

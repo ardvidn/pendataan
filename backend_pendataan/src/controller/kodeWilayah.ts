@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "@/data-resource";
-import { kodeKecamatan } from "@/entity/kodeKecamatan";
-import { kodeKelurahan } from "@/entity/kodeKelurahan";
-import { kodeKabupaten } from "@/entity/kodeKabupaten";
-import { kodeProvinsi } from "@/entity/kodeProvinsi";
+import { AppDataSource } from "../data-resource";
+import { kodeKecamatan } from "../entity/kodeKecamatan";
+import { kodeKelurahan } from "../entity/kodeKelurahan";
+import { kodeKabupaten } from "../entity/kodeKabupaten";
+import { kodeProvinsi } from "../entity/kodeProvinsi";
 
 export const getKodeProvinsi = async (req: Request, res: Response) => {
   try {

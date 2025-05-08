@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DatObjekPajak } from "../entity/DatObjekPajak";
-import { AppDataSource } from "@/data-resource";
-import { atapBangunanOptions, dindingBangunanOptions, getValueByKeys, kdJpbDescriptions, kondisiBangunanOptions, konstruksiBangunanOptions, langitLangitBangunanOptions, lantaiBangunanOptions } from "@/utils/labelData";
+import { AppDataSource } from "../data-resource";
+import { atapBangunanOptions, dindingBangunanOptions, getValueByKeys, kdJpbDescriptions, kondisiBangunanOptions, konstruksiBangunanOptions, langitLangitBangunanOptions, lantaiBangunanOptions } from "../utils/labelData";
 
 export const getAllDatObjekPajak = async (req: Request, res: Response) => {
   try {

@@ -2,7 +2,7 @@
 import { Box, Typography, TextField, Autocomplete, Button, Divider, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useCallback, useEffect, useState } from "react";
-import { atapBangunanOptions, dindingBangunanOptions, kodeJpb, kondisiBangunanOptions, konstruksiBangunanOptions, langitLangitBangunanOptions, lantaiBangunanOptions } from "@/utils/labelData";
+import { atapBangunanOptions, dindingBangunanOptions, kodeJpb, kondisiBangunanOptions, konstruksiBangunanOptions, langitLangitBangunanOptions, lantaiBangunanOptions } from "../../utils/labelData";
 
 interface BuildingData {
   id?: string;

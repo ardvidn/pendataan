@@ -15,7 +15,7 @@ import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import SidebarItem from "./SidebarItem";
 import { useEffect, useState } from "react";
-import { logged } from "@/utils/interface";
+import { logged } from "../utils/interface";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import LogoutIcon from "@mui/icons-material/Logout";

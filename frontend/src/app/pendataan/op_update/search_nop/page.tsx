@@ -3,8 +3,8 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatNop } from "@/utils/formatNOP";
-import { validateNOP } from "@/utils/validateNOP";
+import { formatNop } from "../../../../utils/formatNOP";
+import { validateNOP } from "../../../../utils/validateNOP";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 

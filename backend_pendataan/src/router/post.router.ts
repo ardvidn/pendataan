@@ -1,5 +1,5 @@
-import { inputDatOpPajakUpdate } from "@/controller/datOpPajakUpdate";
-import { PostFotoPersil, uploadFotoMiddleware } from "@/controller/handleImage";
+import { inputDatOpPajakUpdate } from "../controller/datOpPajakUpdate";
+import { PostFotoPersil, uploadFotoMiddleware } from "../controller/handleImage";
 import { Router } from "express";
 
 const postRouter = Router();

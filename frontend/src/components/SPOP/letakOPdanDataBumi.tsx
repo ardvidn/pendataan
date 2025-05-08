@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { formatNoSertifikat, isMaxDigitsValid, isNoSertifikatValid } from "@/utils/FormatForm";
-import { jenisAsalTanahOptions, jenisBumiOptions, jenisPeruntukanOptions, statusWpOptions } from "@/utils/labelData";
-import { getKodeFromLabel, getLabelFromKode } from "@/utils/optionsHelper";
+import { formatNoSertifikat, isMaxDigitsValid, isNoSertifikatValid } from "../../utils/FormatForm";
+import { jenisAsalTanahOptions, jenisBumiOptions, jenisPeruntukanOptions, statusWpOptions } from "../../utils/labelData";
+import { getKodeFromLabel, getLabelFromKode } from "../../utils/optionsHelper";
 import { Autocomplete, Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";

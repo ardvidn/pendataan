@@ -1,5 +1,5 @@
-import { getMe, getRole, login, logout, register, updateUser } from "@/controller/auth";
-import { validateLogin, validateRegister, validateUpdateUser } from "@/middleware/validators";
+import { getMe, getRole, login, logout, register, updateUser } from "../controller/auth";
+import { validateLogin, validateRegister, validateUpdateUser } from "../middleware/validators";
 import { Router } from "express";
 
 const authRouther = Router();

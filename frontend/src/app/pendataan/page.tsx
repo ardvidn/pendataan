@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
-import { logged } from "@/utils/interface";
+import { logged } from "../../utils/interface";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";

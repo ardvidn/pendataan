@@ -1,7 +1,7 @@
-import { getAllDatObjekPajak } from "@/controller/getDatObjekPajak";
-import { getKodeKecamatan, getKodeKelurahan } from "@/controller/getKodeWilayah";
-import { getKodeZnt } from "@/controller/getKodeZnt";
-import { getWajibPajak } from "@/controller/getWajibPajak";
+import { getAllDatObjekPajak } from "../controller/getDatObjekPajak";
+import { getKodeKecamatan, getKodeKelurahan } from "../controller/getKodeWilayah";
+import { getKodeZnt } from "../controller/getKodeZnt";
+import { getWajibPajak } from "../controller/getWajibPajak";
 import { Router } from "express";
 
 const retrieveRouter = Router();

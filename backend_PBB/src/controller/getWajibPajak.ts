@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "@/data-resource";
-import { DatSubjekPajak } from "@/entity/DatSubjekPajak";
+import { AppDataSource } from "../data-resource";
+import { DatSubjekPajak } from "../entity/DatSubjekPajak";
 import { Like } from "typeorm";
 
 // TODO: Implement debouncing on the frontend to limit the number of requests.

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "@/data-resource";
-import { DatNir } from "@/entity/DatNir";
+import { AppDataSource } from "../data-resource";
+import { DatNir } from "../entity/DatNir";
 
 export const getKodeZnt = async (req: Request, res: Response) => {
   try {

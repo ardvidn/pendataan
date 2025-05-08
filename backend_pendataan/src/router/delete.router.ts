@@ -1,5 +1,5 @@
-import { deleteOpPajak } from "@/controller/datOpPajakUpdate";
-import { DeleteFotoPersil } from "@/controller/handleImage";
+import { deleteOpPajak } from "../controller/datOpPajakUpdate";
+import { DeleteFotoPersil } from "../controller/handleImage";
 import { Router } from "express";
 
 const deleteRouter = Router();

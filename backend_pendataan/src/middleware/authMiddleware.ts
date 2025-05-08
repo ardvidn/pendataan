@@ -1,52 +1,6 @@
-// import { Response, NextFunction, Request } from "express";
-// import jwt from "jsonwebtoken";
-// import { AuthenticatedRequest } from "@/types/express";
-// import { verifyToken } from "@/utils/jwt";
-
-// const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
-
-// export const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
-//   const authToken = req.cookies["user-cookies"];
-
-//   if (!authToken) {
-//     return res.status(403).json({
-//       code: 403,
-//       message: "You are not allowed to access this endpoint1",
-//     });
-//   }
-
-//   const verifyTokenResult = verifyToken(authToken);
-
-//   if (!verifyTokenResult.isValid) {
-//     return res.status(403).json({
-//       code: 403,
-//       message: "Invalid Token",
-//     });
-//   }
-
-//   const { id, role } = verifyTokenResult.data;
-
-//   const admin = role === "admin";
-//   const user = role === "user";
-
-//   req.body = { id, role, authToken, ...req.body };
-
-//   next();
-// };
-
-// // Middleware untuk membatasi akses berdasarkan role
-// export const authorizeRole = (roles: string[]) => {
-//   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-//     if (!req.user || !roles.includes(req.user.role)) {
-//       return res.status(403).json({ code: 403, message: "Akses ditolak! Anda tidak memiliki izin." });
-//     }
-//     next();
-//   };
-// };
-
 import { Response, NextFunction, Request } from "express";
 import jwt from "jsonwebtoken";
-import { AuthenticatedRequest } from "@/types/express";
+import { AuthenticatedRequest } from "../types/express";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
 
