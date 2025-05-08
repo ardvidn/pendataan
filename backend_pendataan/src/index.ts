@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 app.use(cookieParser(process.env.COOKIES_SECRET));
 app.use(express.json());
-app.use(cors({ origin: `${process.env.CLIENT_URL}`, methods: "GET,POST,PUT,DELETE", allowedHeaders: "Content-Type,Authorization", credentials: true }));
+app.use(cors({ origin: [`${process.env.CLIENT_URL}`], methods: "GET,POST,PUT,DELETE", allowedHeaders: "Content-Type,Authorization", credentials: true }));
 app.use("/api", apiRouter);
 app.use("/public", express.static("./public"));
 
