@@ -53,7 +53,7 @@ export class DatOpPajak {
   @Column({ type: "char", length: 3, nullable: true })
   rt_op!: string;
 
-  @Column({ type: "char", length: 1 })
+  @Column({ type: "char", length: 20, nullable: true })
   kd_status_wp!: string;
 
   @Column({ type: "char", length: 2 })
@@ -68,7 +68,7 @@ export class DatOpPajak {
   @Column({ type: "varchar", length: 50, nullable: true })
   no_sertifikat!: string;
 
-  @Column({ type: "date", nullable: true })
+  @Column({ type: "text", nullable: true })
   tgl_sertifikat!: string;
 
   @Column({ type: "char", length: 18, nullable: true })
@@ -91,6 +91,9 @@ export class DatOpPajak {
 
   @Column({ type: "varchar", length: 1, nullable: true })
   jns_peruntukan!: string;
+
+  @Column({ type: "varchar", length: 1, nullable: true })
+  jns_asaltanah!: string;
 
   @Column({ type: "timestamp" })
   tgl_pelayanan!: Date;
@@ -137,8 +140,8 @@ export class DatOpPajak {
   @Column({ type: "int", nullable: true })
   walet!: number;
 
-  @Column({ type: "varchar", length: 100, nullable: true })
-  foto_op!: string;
+  @Column({ type: "text", array: true, nullable: true })
+  foto_op!: string[];
 
   @Column({ type: "varchar", length: 255 })
   log_by!: string;

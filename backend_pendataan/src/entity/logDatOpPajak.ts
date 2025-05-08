@@ -62,7 +62,7 @@ export class LogDatOpPajak {
   @Column({ type: "char", length: 3, nullable: true })
   rt_op!: string;
 
-  @Column({ type: "char", length: 1 })
+  @Column({ type: "char", length: 20, nullable: true })
   kd_status_wp!: string;
 
   @Column({ type: "char", length: 2 })
@@ -146,8 +146,8 @@ export class LogDatOpPajak {
   @Column({ type: "int", nullable: true })
   walet!: number;
 
-  @Column({ type: "varchar", length: 100, nullable: true })
-  foto_op!: string;
+  @Column({ type: "text", array: true, nullable: true })
+  foto_op!: string[];
 
   @Column({ type: "varchar", length: 255 })
   log_by!: string;

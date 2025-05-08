@@ -9,6 +9,10 @@ import { WajibPajak } from "./entity/wajibPajak";
 import { LogDatOpPajak } from "./entity/logDatOpPajak";
 import { LogDatOpBangunan } from "./entity/logDatOpBangunan";
 import { LogWajibPajak } from "./entity/logWajibPajak";
+import { kodeProvinsi } from "./entity/kodeProvinsi";
+import { kodeKabupaten } from "./entity/kodeKabupaten";
+import { kodeKecamatan } from "./entity/kodeKecamatan";
+import { kodeKelurahan } from "./entity/kodeKelurahan";
 
 dotenv.config();
 
@@ -24,7 +28,7 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: true,
   ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
-  entities: [accountRole, userAccount, DatOpBangunan, DatOpPajak, WajibPajak, LogDatOpPajak, LogDatOpBangunan, LogWajibPajak],
+  entities: [accountRole, userAccount, DatOpBangunan, DatOpPajak, WajibPajak, LogDatOpPajak, LogDatOpBangunan, LogWajibPajak, kodeProvinsi, kodeKabupaten, kodeKecamatan, kodeKelurahan],
   migrations: ["src/migrations/*.ts"],
   subscribers: ["src/subscriber/*.ts"],
 });
