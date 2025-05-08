@@ -8,12 +8,23 @@ import React, { useEffect } from "react";
 const pendataan = () => {
   const router = useRouter();
   useEffect(() => {
-    axios
-      .get<logged>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/auth/me`, { withCredentials: true })
-      .then((res) => {
-        if (!res.data.loggedIn) router.push("/login");
-      })
-      .catch(() => router.push("/login"));
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get<logged>(
+          `${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/auth/me`,
+          { withCredentials: true, timeout: 5000 } // Tambah timeout
+        );
+
+        if (!res.data.loggedIn) {
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        router.push("/login"); // Pastikan redirect saat error
+      }
+    };
+
+    checkAuth();
   }, [router]);
   return (
     <>

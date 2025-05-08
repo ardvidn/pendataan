@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import GeoInputWithMap from "@/components/LocationForm";
@@ -42,7 +43,6 @@ export default function UpdateNOPForm() {
           setWajibPajak(data.wajib_pajak);
           setLatitude(data.dat_op_pajak.latitude);
           setLongitude(data.dat_op_pajak.longitude);
-          console.log("ini pendataan");
           return;
         }
         // Hanya ambil data PBB jika bukan dari edit button
@@ -56,7 +56,17 @@ export default function UpdateNOPForm() {
           setLongitude(data.dat_op_pajak.longitude);
         }
 
-        console.log("ini pbb");
+        // Fallback jika foto_op kosong
+        if (!spopData.foto_op || spopData.dat_op_pajak.foto_op.length === 0) {
+          const fotoResponse = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getfotopersil/${paramsNOP.nop}`);
+          const imageUrls = fotoResponse.data.imageUrls;
+
+          // Inject ke spopData
+          setSpopData((prev) => ({
+            ...prev,
+            foto_op: imageUrls,
+          }));
+        }
       } catch (error) {
         console.error("Error mengambil data:", error);
       } finally {
