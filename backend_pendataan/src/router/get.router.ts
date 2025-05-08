@@ -1,4 +1,5 @@
 import { checkDatOpPajakExist, getDatOpPajakUpdate, getDatOpPajakUpdateByNOP, getDatOpPajakUpdateBySearch } from "@/controller/datOpPajakUpdate";
+import { GetFotoPersil } from "@/controller/handleImage";
 import { getKodeKabupaten, getKodeKecamatan, getKodeKelurahan, getKodeProvinsi } from "@/controller/kodeWilayah";
 import { Router } from "express";
 
@@ -12,5 +13,6 @@ getRouter.get("/getkodekabupaten", getKodeKabupaten as any);
 getRouter.get("/getkodekecamatan", getKodeKecamatan as any);
 getRouter.get("/getkodekelurahan", getKodeKelurahan as any);
 getRouter.get("/checkdatoppajak/:nop", checkDatOpPajakExist as any);
+getRouter.get("/getfotopersil/:nop", GetFotoPersil as any);
 
 export default getRouter;

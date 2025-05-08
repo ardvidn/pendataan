@@ -27,8 +27,8 @@ export const PostFotoPersil = async (req: Request, res: Response) => {
     }
 
     const photoNumber = currentCount + 1;
-    const extension = file.originalname.split(".").pop();
-    const cloudinaryFileName = `${nop}_${photoNumber}.${extension}`;
+    // const extension = file.originalname.split(".").pop();
+    const cloudinaryFileName = `${nop}_${photoNumber}`;
 
     const uploadImageToCloudinary = (): Promise<string> => {
       return new Promise((resolve, reject) => {
@@ -71,7 +71,7 @@ export const DeleteFotoPersil = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "publicId is required" });
     }
 
-    const result = await cloudinary.uploader.destroy(`fotopersil/${publicId}`);
+    const result = await cloudinary.uploader.destroy(`fotopersil/${publicId.split(".")[0]}`);
 
     if (result.result !== "ok") {
       return res.status(400).json({ message: "Failed to delete image", result });
@@ -80,6 +80,36 @@ export const DeleteFotoPersil = async (req: Request, res: Response) => {
     return res.status(200).json({ code: 200, message: "Image deleted successfully", result });
   } catch (error: any) {
     console.error("Error deleting image:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
+  }
+};
+
+export const GetFotoPersil = async (req: Request, res: Response) => {
+  try {
+    const { nop } = req.params;
+
+    if (!/^\d{18}$/.test(nop)) {
+      return res.status(400).json({ message: `Invalid NOP format: ${nop}` });
+    }
+
+    const result = await cloudinary.search.expression(`public_id starts_with "fotopersil/${nop}_*"`).sort_by("public_id", "asc").max_results(5).execute();
+
+    const imageUrls = result.resources.map((file: any) => file.secure_url);
+
+    if (imageUrls.length === 0) {
+      return res.status(404).json({
+        code: 404,
+        message: "Image not found",
+      });
+    }
+
+    return res.status(200).json({
+      code: 200,
+      message: "Fetched images successfully",
+      imageUrls,
+    });
+  } catch (error: any) {
+    console.error("Error fetching Cloudinary images:", error);
     return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
