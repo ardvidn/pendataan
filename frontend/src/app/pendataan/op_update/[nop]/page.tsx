@@ -1,76 +1,168 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useEffect, useState } from "react";
-import { Box, Stepper, Step, StepLabel, Button } from "@mui/material";
+import GeoInputWithMap from "@/components/LocationForm";
+import { LSPOPForm } from "@/components/LSPOP/LSPOPForm";
 import { SPOPForm } from "@/components/SPOPForm";
-import LSPOPForm from "@/components/LSPOPForm";
-import LocationForm from "@/components/LocationForm";
+import { Box, Step, StepLabel, Stepper, Button, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useParams, useSearchParams } from "next/navigation";
+import { preparePayload } from "@/utils/FormPayload";
+import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { logged, ResponseData } from "@/utils/interface";
 
-const DynamicPage = ({ params }: { params: { nop: string } }) => {
+const steps = ["SPOP", "LSPOP", "Lokasi"];
+
+export default function UpdateNOPForm() {
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ["Data SPOP", "Data LSPOP", "Lokasi"];
-  const [loading, setLoading] = useState(true);
-  const [spopData, setSpopData] = useState<any>(null);
+  const [spopData, setSpopData] = useState<Record<any, any>>({});
+  const [wajibPajak, setWajibPajak] = useState<Record<string, any>>({});
+  const [lspopData, setLspopData] = useState<Record<any, any>[]>([]);
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [username, setUsername] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
-  };
+  const paramsNOP = useParams<{ nop: string }>();
+  const isTanahKosong = spopData?.jns_bumi === "3";
+  const isFromEdit = searchParams.get("source") === "edit";
 
   useEffect(() => {
-    // Fetch existing SPOP data based on NOP
-    const fetchSpopData = async () => {
+    const fetchDatOpPajakUpdateNOP = async () => {
       try {
-        // Replace with actual API call
-        // const response = await fetch(`/api/spop/${nop}`);
-        // const data = await response.json();
-        setSpopData({
-          noSertifikat: "12345",
-          alamat: "Sample address",
-        });
-        setLoading(false);
+        // Selalu ambil data dari pendataan jika dari edit button
+        if (isFromEdit) {
+          const response = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdatebynop?nop=${paramsNOP.nop}`);
+          const data = response.data.data;
+          setSpopData(data.dat_op_pajak);
+          setLspopData(data.dat_op_bangunan);
+          setWajibPajak(data.wajib_pajak);
+          setLatitude(data.dat_op_pajak.latitude);
+          setLongitude(data.dat_op_pajak.longitude);
+          console.log("ini pendataan");
+          return;
+        }
+        // Hanya ambil data PBB jika bukan dari edit button
+        else {
+          const response = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/datobjekpajak?nop=${paramsNOP.nop}`);
+          const data = response.data.data;
+          setSpopData(data.dat_op_pajak);
+          setLspopData(data.dat_op_bangunan);
+          setWajibPajak(data.wajib_pajak);
+          setLatitude(data.dat_op_pajak.latitude);
+          setLongitude(data.dat_op_pajak.longitude);
+        }
+
+        console.log("ini pbb");
       } catch (error) {
-        console.error("Error fetching SPOP data:", error);
-        setLoading(false);
+        console.error("Error mengambil data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (params.nop) {
-      fetchSpopData();
+    setIsLoading(false);
+    fetchDatOpPajakUpdateNOP();
+  }, [paramsNOP.nop, isFromEdit]);
+
+  useEffect(() => {
+    axios
+      .get<logged>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/auth/me`, { withCredentials: true })
+      .then((res) => {
+        setUsername(res.data.data.username);
+      })
+      .catch(() => router.push("/login"));
+  }, [router]);
+
+  const handleNext = async () => {
+    const isLastStep = isTanahKosong ? activeStep === steps.length - 1 : activeStep === steps.length - 1;
+
+    if (isLastStep) {
+      const updatedSpopData = {
+        ...spopData,
+        user_pelayanan: username, //
+        kd_jns_pelayanan: "12",
+        kd_pelayanan: "2",
+        log_by: username,
+      };
+      const payload = preparePayload(updatedSpopData, lspopData, wajibPajak, latitude, longitude, paramsNOP.nop);
+
+      try {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopupdate?nop=${paramsNOP.nop}`, payload);
+        if (response.status === 200) {
+          toast.success(`Berhasil mengunggah op update`);
+
+          router.push(`/pendataan/op_update`);
+        } else {
+          toast.error(`Terjadi kesalahan saat mengunggah op update`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      console.log("Submit data:", payload);
+      // Kirim ke backend jika diperlukan
+    } else {
+      // Skip LSPOP jika tanah kosong
+      if (isTanahKosong && activeStep === 0) {
+        setActiveStep((prev) => prev + 2); // lompat dari SPOP ke Location
+      } else {
+        setActiveStep((prev) => prev + 1);
+      }
     }
-  }, [params.nop]);
+  };
+
+  const handleBack = () => {
+    if (isTanahKosong && activeStep === 2) {
+      setActiveStep((prev) => prev - 2); // kembali langsung ke SPOP
+    } else {
+      setActiveStep((prev) => prev - 1);
+    }
+  };
+
+  if (isLoading) return <Typography>Loading...</Typography>;
 
   return (
-    <Box width={"fullwidth"} height={"fullheight"} sx={{ backgroundColor: "#FFF", borderRadius: "16px" }} pb={5}>
-      <Box pt={4}>
-        <Stepper activeStep={activeStep}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
+    <>
+      <Toaster position="top-center" />
+      <Box width="fullwidth" height="100tvh" sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
+        <Box sx={{ width: "100%", p: 2 }}>
+          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+            {steps.map((label) => {
+              if (isTanahKosong && label === "LSPOP") return null;
+              return (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              );
+            })}
+          </Stepper>
 
-      <Box mt={3}>
-        {activeStep === 0 && <SPOPForm nop={params.nop} setSpopData={setSpopData} spopData={spopData} loading={loading} />}
-        {activeStep === 1 && <LSPOPForm nop={params.nop} />}
-        {activeStep === 2 && <LocationForm nop={params.nop} />}
-      </Box>
+          {activeStep === 0 && <SPOPForm nop={paramsNOP.nop} spopData={spopData} setSpopData={setSpopData} isLoading={isLoading} wajibPajak={wajibPajak} setWajibPajak={setWajibPajak} />}
 
-      <Box mt={4} display="flex" justifyContent="space-between" px={4}>
-        <Button disabled={activeStep === 0} onClick={handleBack} sx={{ color: "red" }}>
-          Back
-        </Button>
-        <Button variant="contained" onClick={handleNext} disabled={activeStep === steps.length - 1}>
-          {activeStep === steps.length - 1 ? "Finish" : "Next"}
-        </Button>
+          {activeStep === 1 && !isTanahKosong && <LSPOPForm nop={paramsNOP.nop} lspopData={lspopData} setLspopData={setLspopData} />}
+
+          {(activeStep === 2 || (activeStep === 1 && isTanahKosong)) && <GeoInputWithMap latitude={latitude} longitude={longitude} setLatitude={setLatitude} setLongitude={setLongitude} spopData={spopData} setSpopData={setSpopData} />}
+
+          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+            <Button
+              disabled={activeStep === 0}
+              onClick={handleBack}
+              sx={activeStep === steps.length - 1 || (isTanahKosong && activeStep === steps.length - 2) ? { mr: 1, backgroundColor: "#FFC107", color: "#023047" } : { mr: 1, backgroundColor: "#FFC107", color: "#023047" }}
+            >
+              Back
+            </Button>
+            <Box sx={{ flex: "1 1 auto" }} />
+            <Button onClick={handleNext} sx={{ backgroundColor: "#219EBC", color: "#FFF" }}>
+              {isTanahKosong ? (activeStep === steps.length - 1 ? "Finish" : "Next") : activeStep === steps.length - 1 ? "Finish" : "Next"}
+            </Button>
+          </Box>
+
+          {((!isTanahKosong && activeStep === steps.length) || (isTanahKosong && activeStep === steps.length - 1)) && <Typography sx={{ mt: 2, mb: 1 }}>Data berhasil dikirim!</Typography>}
+        </Box>
       </Box>
-    </Box>
+    </>
   );
-};
-
-export default DynamicPage;
+}

@@ -14,6 +14,12 @@ import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import SidebarItem from "./SidebarItem";
+import { useEffect, useState } from "react";
+import { logged } from "@/utils/interface";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import LogoutIcon from "@mui/icons-material/Logout";
+import toast, { Toaster } from "react-hot-toast";
 
 const drawerWidth = 240;
 
@@ -71,12 +77,47 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" 
 }));
 
 export default function Sidebar({ open, setOpen }: { open: boolean; setOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    axios
+      .get<logged>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/auth/me`, { withCredentials: true })
+      .then((res) => {
+        setUsername(res.data.data.username);
+        setIsLoggedIn(res.data.loggedIn);
+      })
+      .catch(() => router.push("/login"));
+  }, [router]);
+
   const handleDrawerToggle = () => {
     setOpen(!open);
   };
 
+  const handleLogout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/auth/logout`, {}, { withCredentials: true });
+      if (res.status && res.status === 200) {
+        toast.success("Logout berhasil!");
+      }
+
+      router.push("/login");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Logout gagal!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
+      <Toaster position="top-center" />
       <CssBaseline />
 
       <Drawer variant="permanent" open={open}>
@@ -140,7 +181,32 @@ export default function Sidebar({ open, setOpen }: { open: boolean; setOpen: Rea
                       },
                 ]}
               >
-                asdasdadsa
+                {username}
+              </ListItemText>
+              <ListItemText
+                sx={[
+                  open
+                    ? {
+                        opacity: 1,
+                      }
+                    : {
+                        opacity: 0,
+                      },
+                ]}
+              >
+                <Button
+                  variant="contained"
+                  disabled={!isLoggedIn || loading}
+                  sx={{
+                    bgcolor: "#FFC107",
+                    color: "#000",
+                    "&:hover": {
+                      bgcolor: "#E0A800",
+                    },
+                  }}
+                  startIcon={<LogoutIcon />}
+                  onClick={handleLogout}
+                ></Button>
               </ListItemText>
             </ListItemButton>
           </ListItem>

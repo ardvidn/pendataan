@@ -1,22 +1,88 @@
+// "use client";
+
+// import React, { useState } from "react";
+// import Sidebar from "@/components/Sidebar";
+// import { Box } from "@mui/material";
+
+// export default function ClientLayout({ children }: { children: React.ReactNode }) {
+//   const [open, setOpen] = useState(false); // State untuk sidebar buka/tutup
+
+//   return (
+//     <Box sx={{ display: "flex", minHeight: "100tvh" }}>
+//       <Sidebar open={open} setOpen={setOpen} /> {/* Kirim state ke Sidebar */}
+//       <Box
+//         component="main"
+//         sx={{
+//           flexGrow: 1,
+//           transition: "margin 0.3s ease",
+//           marginLeft: "10px", // Sesuaikan dengan width Sidebar
+//           padding: "16px",
+//         }}
+//       >
+//         {children}
+//       </Box>
+//     </Box>
+//   );
+// }
+
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
-import { Box } from "@mui/material";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
+import axios from "axios";
+import { usePathname, useRouter } from "next/navigation";
+import { logged } from "@/utils/interface";
+import MobileNavbar from "./MobileNavbar";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false); // State untuk sidebar buka/tutup
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [open, setOpen] = useState(false);
+  const [username, setUsername] = useState<string>("");
+  const pathname = usePathname();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const router = useRouter();
+
+  useEffect(() => {
+    axios
+      .get<logged>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/auth/me`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        setIsAuthenticated(res.data.loggedIn);
+        setUsername(res.data.data.username);
+        if (!res.data.loggedIn && pathname !== "/login") {
+          router.push("/login");
+        }
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+        if (pathname !== "/login") {
+          router.push("/login");
+        }
+      });
+  }, [pathname, router]);
+
+  // Saat status belum ditentukan, hindari render
+  if (isAuthenticated === null) return null;
+
+  // Untuk halaman login, render langsung tanpa sidebar
+  if (pathname === "/login") {
+    return <>{children}</>;
+  }
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <Sidebar open={open} setOpen={setOpen} /> {/* Kirim state ke Sidebar */}
+    <Box sx={{ display: "flex", minHeight: "100tvh", width: "100tvw" }}>
+      {isMobile ? <MobileNavbar username={username} /> : <Sidebar open={open} setOpen={setOpen} />}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           transition: "margin 0.3s ease",
-          marginLeft: "10px", // Sesuaikan dengan width Sidebar
-          padding: "16px",
+          paddingLeft: isMobile ? "0px" : "10px",
+          paddingRight: isMobile ? 4 : 1,
+          paddingY: isMobile ? 8 : "16px",
         }}
       >
         {children}

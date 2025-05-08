@@ -1,30 +1,182 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useEffect } from "react";
-import { Box, TextField, Autocomplete, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Divider, Typography } from "@mui/material";
-import UploadFotoPersilBox from "./uploadImage";
+import { useEffect, useState } from "react";
+import { Box, TextField, Typography } from "@mui/material";
+import { formatNop } from "@/utils/formatNOP";
+import axios from "axios";
+import { formatRibuan } from "@/utils/FormatForm";
+import AxiosError from "axios";
+import LetakOPdanDataBumi from "./SPOP/letakOPdanDataBumi";
+import DataWPdanFoto from "./SPOP/DataWPdanFoto";
+import { ApiResponse, Kabupaten, Kecamatan, Kelurahan, Provinsi, WajibPajak, ZNT } from "@/utils/interface";
 
 interface SpopFormProps {
   nop: string;
+  setSpopData: React.Dispatch<React.SetStateAction<any>>;
+  spopData: any;
+  isLoading: boolean;
+  wajibPajak: any;
+  setWajibPajak: React.Dispatch<React.SetStateAction<any>>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const SPOPForm = ({ nop, setSpopData, spopData, loading }: { nop: SpopFormProps; setSpopData: React.Dispatch<React.SetStateAction<string>>; spopData: any; loading: any }) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, setWajibPajak }: SpopFormProps) => {
   const [showLahanKeterangan, setShowLahanKeterangan] = useState(false);
+  const [provinsiOptions, setProvinsiOptions] = useState<string[]>([]);
 
-  // Mock data for autocomplete options
-  const statusWpOptions = ["Pribadi", "Badan", "Pemerintah"];
-  const jenisBumiOptions = ["Tanah Kosong", "Tanah Bangunan", "Tanah Pertanian"];
-  const zntOptions = ["ZNT 1", "ZNT 2", "ZNT 3"];
-  const jenisAsalTanahOptions = ["Hak Milik", "Hak Guna Bangunan", "Hak Pakai"];
-  const jenisWpOptions = ["Pribadi", "Badan", "Pemerintah"];
-  const jenisIdentitasOptions = ["KTP", "SIM", "Passport"];
-  const jenisKelaminOptions = ["Laki-laki", "Perempuan"];
-  const provinsiOptions = ["Jawa Barat", "Jawa Tengah", "Jawa Timur"];
-  const pekerjaanOptions = ["PNS", "Swasta", "Wiraswasta"];
-  const jenisPeruntukanOptions = ["Non Komersil", "Komersil"];
+  const [kabupatenOptions, setKabupatenOptions] = useState<any[]>([]);
 
-  if (loading) {
+  const [kecamatanOptions, setKecamatanOptions] = useState<any[]>([]);
+
+  const [kelurahanOptions, setKelurahanOptions] = useState<any[]>([]);
+  const [zntOptions, setZntOptions] = useState<string[]>([]);
+  const [valueProvinsi, setValueProvinsi] = useState<string | null>(null);
+  const [valueKabupaten, setValueKabupaten] = useState<string | null>(null);
+  const [valueKecamatan, setValueKecamatan] = useState<string | null>(null);
+  const [valueKelurahan, setValueKelurahan] = useState<string | null>(null);
+  const [kabupatenOptionsFiltered, setKabupatenOptionsFiltered] = useState<string[]>([]);
+  const [kecamatanOptionsFiltered, setKecamatanOptionsFiltered] = useState<string[]>([]);
+  const [kelurahanOptionsFiltered, setKelurahanOptionsFiltered] = useState<string[]>([]);
+
+  const [wajibPajakOptions, setWajibPajakOptions] = useState<any[]>([]);
+  const [rawInputWajibPajak, setRawInputWajibPajak] = useState("");
+  const [loadingWajibPajak, setLoadingWajibPajak] = useState(false);
+  const [disableNoIdentitas, setDisableNoIdentitas] = useState(false);
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        // Fetch data kecamatan dari backend
+        const responseProvinsi = await axios.get<ApiResponse<Provinsi>>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getkodeprovinsi`);
+        const provinsiData = responseProvinsi.data.data.map((item) => `${item.KD_PROV} - ${item.NM_PROV}`);
+        setProvinsiOptions(provinsiData);
+
+        // Fetch data kelurahan dari backend
+        const responseKabupaten = await axios.get<ApiResponse<Kabupaten>>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getkodekabupaten`);
+        const kabupatenData = responseKabupaten.data.data;
+        setKabupatenOptions(kabupatenData);
+
+        // Fetch data kelurahan dari backend
+        const responseKecamatan = await axios.get<ApiResponse<Kecamatan>>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getkodekecamatan`);
+        const kecamatanData = responseKecamatan.data.data;
+        setKecamatanOptions(kecamatanData);
+
+        // Fetch data kelurahan dari backend
+        const responseKelurahan = await axios.get<ApiResponse<Kelurahan>>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getkodekelurahan`);
+        const kelurahanData = responseKelurahan.data.data;
+        setKelurahanOptions(kelurahanData);
+
+        // fetch data ZNT
+        const responseZnt = await axios.get<ApiResponse<ZNT>>(
+          `${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/kodeznt?tahun=2024&kd_prov=${nop.slice(0, 2)}&kd_kab=${nop.slice(2, 4)}&kd_kec=${nop.slice(4, 7)}&kd_kel=${nop.slice(7, 10)}`
+        );
+        const ZNTData = responseZnt.data.data.map((item) => `${item.kdZnt} - ${formatRibuan(item.nir * 1000)}`);
+        setZntOptions(ZNTData);
+      } catch (error) {
+        console.error("Error fetching options:", error);
+      }
+    };
+    fetchOptions();
+  }, [nop]);
+
+  const fetchWajibPajak = async (noIdentitas: string) => {
+    try {
+      setLoadingWajibPajak(true);
+
+      const onlyDigits = noIdentitas.replace(/\D/g, "");
+
+      const response = await axios.get<ApiResponse<WajibPajak>>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/wajibpajak?noIdentitas=${onlyDigits}`);
+
+      const data = response.data.data;
+
+      const formatted = data.map((item) => ({
+        label: `${item.id} - ${item.name}`,
+        value: item.id,
+        namaWajibPajak: item.name,
+      }));
+
+      setWajibPajakOptions(formatted);
+    } catch (error) {
+      if (error instanceof AxiosError && (await error).status === 404) {
+        setWajibPajakOptions([
+          {
+            label: "Nomor identitas tidak ditemukan!!!",
+            value: "not_found",
+            namaWajibPajak: "",
+          },
+        ]);
+      }
+    } finally {
+      setLoadingWajibPajak(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!rawInputWajibPajak || rawInputWajibPajak.length < 6) return;
+
+    const handler = setTimeout(() => {
+      fetchWajibPajak(rawInputWajibPajak);
+    }, 300); // ⏱️ debounce 300ms
+
+    return () => clearTimeout(handler);
+  }, [rawInputWajibPajak]);
+
+  const handleOnChangeKabupaten = (event: React.SyntheticEvent, newValue: string | null) => {
+    setValueProvinsi(newValue);
+
+    setWajibPajak((prev: any) => ({
+      ...prev,
+      kd_provinsi: newValue || "",
+      kd_kabupaten: "",
+      kd_kecamatan: "",
+      kd_kelurahan: "",
+    }));
+
+    const kodeProv = newValue?.split(" - ")[0];
+    const filteredKabupaten = kabupatenOptions.filter((item) => item.KD_PROV === kodeProv).map((item) => `${item.KD_KAB} - ${item.NM_KAB}`);
+
+    setKabupatenOptionsFiltered(filteredKabupaten);
+    setKecamatanOptionsFiltered([]);
+    setKelurahanOptionsFiltered([]);
+  };
+
+  const handleOnChangeKecamatan = (event: React.SyntheticEvent, newValue: string | null) => {
+    setValueKabupaten(newValue);
+
+    setWajibPajak((prev: any) => ({
+      ...prev,
+      kd_kabupaten: newValue || "",
+      kd_kecamatan: "",
+      kd_kelurahan: "",
+    }));
+
+    const kodeKab = newValue?.split(" - ")[0];
+    const kodeProv = valueProvinsi?.split(" - ")[0];
+
+    const filteredKecamatan = kecamatanOptions.filter((item) => item.KD_KAB === kodeKab && item.KD_PROV === kodeProv).map((item) => `${item.KD_KEC} - ${item.NM_KEC}`);
+
+    setKecamatanOptionsFiltered(filteredKecamatan);
+    setKelurahanOptionsFiltered([]);
+  };
+
+  const handleOnChangeKelurahan = (event: React.SyntheticEvent, newValue: string | null) => {
+    setValueKecamatan(newValue);
+
+    setWajibPajak((prev: any) => ({
+      ...prev,
+      kd_kecamatan: newValue || "",
+      kd_kelurahan: "",
+    }));
+
+    const kodeKec = newValue?.split(" - ")[0];
+    const kodeKab = valueKabupaten?.split(" - ")[0];
+    const kodeProv = valueProvinsi?.split(" - ")[0];
+
+    const filteredKelurahan = kelurahanOptions.filter((item) => item.KD_KEC === kodeKec && item.KD_KAB === kodeKab && item.KD_PROV === kodeProv).map((item) => `${item.KD_KEL} - ${item.NM_KEL}`);
+
+    setKelurahanOptionsFiltered(filteredKelurahan);
+  };
+
+  if (isLoading) {
     return <Typography>Loading SPOP data...</Typography>;
   }
 
@@ -34,15 +186,52 @@ export const SPOPForm = ({ nop, setSpopData, spopData, loading }: { nop: SpopFor
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSpopData({ ...spopData, [name]: value });
+    // setSpopData({ ...spopData, [name]: value });
+
+    setSpopData((prevData: any) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleNestedChange = (parentKey: string, childKey: string, value: string) => {
+    setSpopData((prevData: any) => ({
+      ...prevData,
+      [parentKey]: {
+        ...prevData[parentKey],
+        [childKey]: value,
+      },
+    }));
   };
 
   const handleDateChange = (name: string, value: Date | null) => {
     setSpopData({ ...spopData, [name]: value });
   };
 
-  const handleAutocompleteChange = (name: string, value: any) => {
-    setSpopData({ ...spopData, [name]: value });
+  // const handleAutocompleteChange = (name: string, value: string) => {
+  //   setSpopData({ ...spopData, [name]: value });
+  // };
+
+  const handleAutocompleteChange = (name: string, value: string, index?: number) => {
+    if (["kdZnt", "jnsBumi"].includes(name) && typeof index === "number") {
+      setSpopData((prevData: { datOpBumis: any }) => {
+        const newDatOpBumis = [...prevData.datOpBumis];
+        newDatOpBumis[index] = {
+          ...newDatOpBumis[index],
+          [name]: value,
+        };
+
+        return {
+          ...prevData,
+          datOpBumis: newDatOpBumis,
+        };
+      });
+    } else {
+      setSpopData((prevData: any) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,250 +245,52 @@ export const SPOPForm = ({ nop, setSpopData, spopData, loading }: { nop: SpopFor
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const DateInput = ({ label, name, value, onChange }: any) => <TextField fullWidth label={label} name={name} type="date" value={value || ""} onChange={onChange} InputLabelProps={{ shrink: true }} />;
-
-  if (loading) return <Typography>Loading...</Typography>;
-  if (!spopData) return <Typography>Data tidak ditemukan</Typography>;
-
   return (
     <>
+      <Box mt={2}>
+        <TextField fullWidth label="Nomor Objek Pajak" name="nop" value={formatNop(nop)} disabled />
+      </Box>
       <Box display="flex" flexWrap="wrap">
-        {/* Kiri - Letak WP dan Data Bumi */}
-        <Box flex={1} minWidth="48%" mx={2}>
-          <Typography variant="h6" gutterBottom sx={{ color: "red" }} mt={4}>
-            Data Letak Wajib Pajak
-          </Typography>
-          <Divider />
+        <LetakOPdanDataBumi
+          spopData={spopData}
+          setSpopData={setSpopData}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
+          zntOptions={zntOptions}
+          showLahanKeterangan={showLahanKeterangan}
+          handleDateChange={handleDateChange}
+          handleAutocompleteChange={handleAutocompleteChange}
+        />
 
-          <Box mt={2}>
-            <DateInput label="Tanggal Sertifikat" name="tanggalSertifikat" value={spopData.tanggalSertifikat} onChange={handleChange} />
-          </Box>
-
-          <Box mt={2}>
-            <TextField fullWidth label="No Sertifikat" name="noSertifikat" value={spopData.noSertifikat || ""} onChange={handleChange} />
-          </Box>
-
-          <Box mt={2}>
-            <TextField fullWidth label="Alamat" name="alamat" value={spopData.alamat || ""} onChange={handleChange} />
-          </Box>
-
-          <Box mt={2}>
-            <TextField fullWidth label="Dusun / Lingkungan" name="dusun" value={spopData.dusun || ""} onChange={handleChange} />
-          </Box>
-
-          <Box mt={2}></Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <TextField fullWidth label="Blok / Kav / No" name="blok" value={spopData.blok || ""} onChange={handleChange} />
-            <Box display="flex" gap={1}>
-              <TextField fullWidth label="RT" name="rt" value={spopData.rt || ""} onChange={handleChange} />
-              <TextField fullWidth label="RW" name="rw" value={spopData.rw || ""} onChange={handleChange} />
-            </Box>
-          </Box>
-
-          <Box mt={2}>
-            <Autocomplete
-              options={statusWpOptions}
-              value={spopData.statusWp || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("statusWp", newValue)}
-              renderInput={(params) => <TextField {...params} label="Status WP" fullWidth />}
-            />
-          </Box>
-
-          <Box mt={2}>
-            <FormControl fullWidth>
-              <FormLabel>Status Cabang</FormLabel>
-              <RadioGroup row name="statusCabang" value={spopData.statusCabang || "Bukan Cabang"} onChange={handleRadioChange}>
-                <FormControlLabel value="Cabang" control={<Radio />} label="Cabang" sx={{ color: "#000" }} />
-                <FormControlLabel value="Bukan Cabang" control={<Radio />} label="Bukan Cabang" sx={{ color: "#000" }} />
-              </RadioGroup>
-            </FormControl>
-          </Box>
-
-          {/* Data Bumi */}
-          <Typography variant="h6" gutterBottom sx={{ color: "red" }} mt={4}>
-            Data Bumi
-          </Typography>
-          <Divider />
-
-          <Box display="flex" gap={2} mt={2}>
-            <TextField fullWidth label="Luas Bumi" name="luasBumi" type="number" value={spopData.luasBumi || ""} onChange={handleChange} />
-            <Autocomplete fullWidth options={zntOptions} value={spopData.znt || ""} onChange={(e, newValue) => handleAutocompleteChange("znt", newValue)} renderInput={(params) => <TextField {...params} label="ZNT" fullWidth />} />
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <Autocomplete
-              fullWidth
-              options={jenisBumiOptions}
-              value={spopData.jenisBumi || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("jenisBumi", newValue)}
-              renderInput={(params) => <TextField {...params} label="Jenis Bumi" fullWidth />}
-            />
-
-            <Autocomplete
-              fullWidth
-              options={jenisPeruntukanOptions}
-              value={spopData.jenisPeruntukan || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("jenisPeruntukan", newValue)}
-              renderInput={(params) => <TextField {...params} label="Jenis Peruntukan" fullWidth />}
-            />
-          </Box>
-
-          {/* <Box mt={2}>
-            <FormControl fullWidth>
-              <FormLabel>Jenis Peruntukan</FormLabel>
-              <RadioGroup row name="jenisPeruntukan" value={spopData.jenisPeruntukan || "Non Komersil"} onChange={handleRadioChange}>
-                <FormControlLabel value="Komersil" control={<Radio />} label="Komersil" />
-                <FormControlLabel value="Non Komersil" control={<Radio />} label="Non Komersil" />
-              </RadioGroup>
-            </FormControl>
-          </Box> */}
-
-          <Box mt={2}>
-            <Autocomplete
-              options={jenisAsalTanahOptions}
-              value={spopData.jenisAsalTanah || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("jenisAsalTanah", newValue)}
-              renderInput={(params) => <TextField {...params} label="Jenis Asal Tanah" fullWidth />}
-            />
-          </Box>
-
-          <Box mt={2}>
-            <FormControl fullWidth>
-              <FormLabel>Lahan Produksi Pangan dan Ternak</FormLabel>
-              <RadioGroup row name="lahanProduksiPangan" value={spopData.lahanProduksiPangan || "Tidak Benar"} onChange={handleRadioChange}>
-                <FormControlLabel value="Benar" control={<Radio />} label="Benar" sx={{ color: "#000" }} />
-                <FormControlLabel value="Tidak Benar" control={<Radio />} label="Tidak Benar" sx={{ color: "#000" }} />
-              </RadioGroup>
-            </FormControl>
-          </Box>
-
-          {showLahanKeterangan && (
-            <Box mt={2}>
-              <TextField fullWidth label="Keterangan Lahan Produksi Pangan dan Ternak" name="keteranganLahanProduksi" value={spopData.keteranganLahanProduksi || ""} onChange={handleChange} />
-            </Box>
-          )}
-        </Box>
-
-        {/* Kanan - Data WP dan Foto */}
-        <Box flex={1} minWidth="48%" mx={2}>
-          <Typography variant="h6" gutterBottom sx={{ color: "red" }} mt={4}>
-            Data Wajib Pajak
-          </Typography>
-          <Divider />
-
-          <Box mt={2}>
-            <Autocomplete
-              options={jenisWpOptions}
-              value={spopData.jenisWp || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("jenisWp", newValue)}
-              renderInput={(params) => <TextField {...params} label="Jenis Wajib Pajak" fullWidth />}
-            />
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <TextField fullWidth label={"No Identitas"} name={"noIdentitas"} type={"text"} value={spopData["noIdentitas"] || ""} onChange={handleChange} />
-
-            <Autocomplete
-              fullWidth
-              options={jenisIdentitasOptions}
-              value={spopData.jenisIdentitas || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("jenisIdentitas", newValue)}
-              renderInput={(params) => <TextField {...params} label="Jenis Identitas" fullWidth />}
-            />
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <TextField fullWidth label={"Nama Wajib Pajak"} name={"namaWp"} type={"text"} value={spopData["namaWp"] || ""} onChange={handleChange} />
-            <Autocomplete
-              fullWidth
-              options={jenisKelaminOptions}
-              value={spopData.jenisKelamin || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("jenisKelamin", newValue)}
-              renderInput={(params) => <TextField {...params} label="Jenis Kelamin" fullWidth />}
-            />
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <TextField fullWidth label={"Tempat Lahir"} name={"tempatLahir"} type={"text"} value={spopData["tempatLahir"] || ""} onChange={handleChange} />
-            <DateInput label="Tanggal Lahir" value={spopData.tanggalLahir || null} onChange={(newValue) => handleDateChange("tanggalLahir", newValue)} renderInput={(params) => <TextField fullWidth {...params} />} />
-          </Box>
-
-          <Box mt={2}>
-            <TextField fullWidth label={"Alamat"} name={"alamatWp"} type={"text"} value={spopData["alamatWp"] || ""} onChange={handleChange} />
-          </Box>
-          <Box mt={2}>
-            <TextField fullWidth label={"Dusun/Lingkungan"} name={"dusunWp"} type={"text"} value={spopData["dusunWp"] || ""} onChange={handleChange} />
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <TextField fullWidth label={"Blok/Kav/No"} name={"namaWp"} type={"text"} value={spopData["namaWp"] || ""} onChange={handleChange} />
-            <Box display="flex" gap={1}>
-              <TextField fullWidth label={"RT"} name={"namaWp"} type={"text"} value={spopData["namaWp"] || ""} onChange={handleChange} />
-              <TextField fullWidth label={"RW"} name={"namaWp"} type={"text"} value={spopData["namaWp"] || ""} onChange={handleChange} />
-            </Box>
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <Autocomplete
-              fullWidth
-              options={provinsiOptions}
-              value={spopData.provinsi || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("provinsi", newValue)}
-              renderInput={(params) => <TextField {...params} label="Provinsi" fullWidth />}
-            />
-            <Autocomplete
-              fullWidth
-              options={provinsiOptions}
-              value={spopData.kabupaten || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("kabupaten", newValue)}
-              renderInput={(params) => <TextField {...params} label="kabupaten" fullWidth />}
-            />
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <Autocomplete
-              fullWidth
-              options={provinsiOptions}
-              value={spopData.kecamatan || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("kecamatan", newValue)}
-              renderInput={(params) => <TextField {...params} label="kecamatan" fullWidth />}
-            />
-            <Autocomplete
-              fullWidth
-              options={provinsiOptions}
-              value={spopData.kelurahan || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("kelurahan", newValue)}
-              renderInput={(params) => <TextField {...params} label="kelurahan" fullWidth />}
-            />
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <Autocomplete
-              fullWidth
-              options={pekerjaanOptions}
-              value={spopData.pekerjaan || ""}
-              onChange={(e, newValue) => handleAutocompleteChange("pekerjaan", newValue)}
-              renderInput={(params) => <TextField {...params} label="Pekerjaan" fullWidth />}
-            />
-            <TextField fullWidth label={"Telepon"} name={"telepon"} type={"text"} value={spopData["telepon"] || ""} onChange={handleChange} />
-          </Box>
-
-          <Box display="flex" gap={2} mt={2}>
-            <TextField fullWidth label="Email" name="email" value={spopData.email || ""} onChange={handleChange} />
-            <TextField fullWidth label="NPWP" name="npwp" value={spopData.npwp || ""} onChange={handleChange} />
-          </Box>
-
-          {/* Foto Upload */}
-          <Box mt={4}>
-            <Typography variant="h6" gutterBottom sx={{ color: "red" }}>
-              Foto Objek Pajak
-            </Typography>
-            <Divider />
-            <UploadFotoPersilBox />
-          </Box>
-        </Box>
+        <DataWPdanFoto
+          nop={nop}
+          spopData={spopData}
+          setSpopData={setSpopData}
+          handleAutocompleteChange={handleAutocompleteChange}
+          loadingWajibPajak={loadingWajibPajak}
+          wajibPajakOptions={wajibPajakOptions}
+          disableNoIdentitas={disableNoIdentitas}
+          setRawInputWajibPajak={setRawInputWajibPajak}
+          handleNestedChange={handleNestedChange}
+          setDisableNoIdentitas={setDisableNoIdentitas}
+          handleChange={handleChange}
+          handleDateChange={handleDateChange}
+          provinsiOptions={provinsiOptions}
+          valueProvinsi={valueProvinsi}
+          handleOnChangeKabupaten={handleOnChangeKabupaten}
+          kabupatenOptionsFiltered={kabupatenOptionsFiltered}
+          valueKabupaten={valueKabupaten}
+          handleOnChangeKecamatan={handleOnChangeKecamatan}
+          kecamatanOptionsFiltered={kecamatanOptionsFiltered}
+          valueKecamatan={valueKecamatan}
+          handleOnChangeKelurahan={handleOnChangeKelurahan}
+          kelurahanOptionsFiltered={kelurahanOptionsFiltered}
+          valueKelurahan={valueKelurahan}
+          setValueKelurahan={setValueKelurahan}
+          setWajibPajak={setWajibPajak}
+          rawInputWajibPajak={rawInputWajibPajak}
+          wajibPajak={wajibPajak}
+        />
       </Box>
     </>
   );

@@ -1,0 +1,269 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// import React from "react";
+// import { Box, TextField, Typography, Button, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, IconButton } from "@mui/material";
+// import EditIcon from "@mui/icons-material/Edit";
+// import DeleteIcon from "@mui/icons-material/Delete";
+// import { formatNop } from "@/utils/formatNOP";
+
+// interface SpopFormProps {
+//   nop: string;
+// }
+
+// const LspopAwal = ({ nop }: SpopFormProps) => {
+//   const dataBangunan = [
+//     {
+//       no: 1,
+//       jenis: "01 - PERUMAHAN",
+//       luas: 84,
+//       lantai: 1,
+//       tahun: 2015,
+//     },
+//   ];
+
+//   return (
+//     <Box sx={{ p: 3 }}>
+//       {/* Form Transaksi */}
+//       <Box sx={{ mb: 3 }} width={{ md: 1 / 5 }}>
+//         <TextField fullWidth label="Jenis Transaksi *" value="PEMUTAKHIRAN DATA BANGUNAN" sx={{ mb: 2 }} disabled />
+//         <TextField fullWidth label="NOP *" value={formatNop(nop)} disabled />
+//       </Box>
+
+//       {/* Judul Daftar Objek Bangunan */}
+//       <Box
+//         sx={{
+//           display: "flex",
+//           justifyContent: "space-between",
+//           alignItems: "center",
+//           my: 2,
+//           borderTop: "1px solid #eee",
+//           borderBottom: "1px solid #eee",
+//           py: 1,
+//         }}
+//       >
+//         <Typography variant="subtitle1" fontWeight="bold" mx="auto">
+//           Daftar Objek Bangunan
+//         </Typography>
+//         <Button variant="contained" color="info" size="small">
+//           + Objek Bangunan
+//         </Button>
+//       </Box>
+
+//       {/* Tabel */}
+//       <Box display="flex" justifyContent="center" alignItems="center">
+//         <TableContainer sx={{ mt: 3, width: "70vw" }}>
+//           <Table>
+//             <TableHead>
+//               <TableRow>
+//                 <TableCell align="center" sx={{ color: "red" }}>
+//                   No Bangunan
+//                 </TableCell>
+//                 <TableCell align="center" sx={{ color: "red" }}>
+//                   Jenis Bangunan
+//                 </TableCell>
+//                 <TableCell align="center" sx={{ color: "red" }}>
+//                   Luas Bangunan
+//                 </TableCell>
+//                 <TableCell align="center" sx={{ color: "red" }}>
+//                   Jumlah Lantai
+//                 </TableCell>
+//                 <TableCell align="center" sx={{ color: "red" }}>
+//                   Tahun Dibangun
+//                 </TableCell>
+//                 <TableCell align="center" sx={{ color: "red" }}>
+//                   Aksi
+//                 </TableCell>
+//               </TableRow>
+//             </TableHead>
+//             <TableBody>
+//               {dataBangunan.map((item, index) => (
+//                 <TableRow key={index}>
+//                   <TableCell align="center">{item.no}</TableCell>
+//                   <TableCell align="center">{item.jenis}</TableCell>
+//                   <TableCell align="center">{item.luas}</TableCell>
+//                   <TableCell align="center">{item.lantai}</TableCell>
+//                   <TableCell align="center">{item.tahun}</TableCell>
+//                   <TableCell align="center">
+//                     <IconButton color="primary">
+//                       <EditIcon />
+//                     </IconButton>
+//                     <IconButton color="error">
+//                       <DeleteIcon />
+//                     </IconButton>
+//                   </TableCell>
+//                 </TableRow>
+//               ))}
+//             </TableBody>
+//           </Table>
+//         </TableContainer>
+//       </Box>
+//     </Box>
+//   );
+// };
+
+// export default LspopAwal;
+"use client";
+import { useState } from "react";
+import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Typography, TextField } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { formatNop } from "@/utils/formatNOP";
+import BuildingModal from "./BuildingModal";
+import { kodeJpb } from "@/utils/labelData";
+import { BuildingData } from "@/utils/interface";
+
+interface lspopProps {
+  lspopData: any;
+  setLspopData: React.Dispatch<React.SetStateAction<any>>;
+  nop: string;
+}
+
+export const LSPOPForm = ({ nop, lspopData, setLspopData }: lspopProps) => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentBuilding, setCurrentBuilding] = useState<BuildingData>({
+    no_bng: "",
+    kd_jpb: "",
+    bng_luas: "",
+    bng_jml_lantai: "",
+    bng_thn_dibangun: "",
+    bng_thn_renovasi: "",
+    bng_kd_kondisi: "",
+    bng_kd_konstruksi: "",
+    bng_kd_atap: "",
+    bng_kd_dinding: "",
+    bng_kd_lantai: "",
+    bng_kd_langit_langit: "",
+    jnsTransaksiBng: "",
+  });
+
+  const handleSave = (data: BuildingData) => {
+    const isEdit = lspopData.some((b: any) => b.no_bng === data.no_bng);
+
+    if (isEdit) {
+      setLspopData(lspopData.map((b: any) => (b.no_bng === data.no_bng ? data : b)));
+    } else {
+      setLspopData([...lspopData, data]);
+    }
+
+    setModalOpen(false);
+  };
+
+  const handleEdit = (building: BuildingData) => {
+    setCurrentBuilding(building);
+    setModalOpen(true);
+  };
+
+  const handleDelete = (no_bng: string) => {
+    if (window.confirm("Yakin ingin menghapus bangunan ini?")) {
+      setLspopData(lspopData.filter((b: any) => b.no_bng !== no_bng));
+    }
+  };
+
+  const getNextNoBng = (buildings: BuildingData[]): string => {
+    const usedNumbers = buildings.map((b) => parseInt(b.no_bng || "0", 10)).filter((n) => !isNaN(n));
+
+    const maxNo = usedNumbers.length ? Math.max(...usedNumbers) : 0;
+    return (maxNo + 1).toString(); // contoh hasil: "001", "002", ...
+  };
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <TextField sx={{ width: { md: 1 / 4 } }} label="Nomor Objek Pajak" value={formatNop(nop)} disabled />
+        <Typography variant="h6">Daftar Bangunan</Typography>
+        <Button
+          variant="contained"
+          onClick={() => {
+            const newNoBng = getNextNoBng(lspopData);
+            setCurrentBuilding({
+              no_bng: newNoBng, // <-- penting!
+              kd_jpb: "",
+              bng_luas: "",
+              bng_jml_lantai: "",
+              bng_thn_dibangun: "",
+              bng_thn_renovasi: "",
+              bng_kd_kondisi: "",
+              bng_kd_konstruksi: "",
+              bng_kd_atap: "",
+              bng_kd_dinding: "",
+              bng_kd_lantai: "",
+              bng_kd_langit_langit: "",
+              jnsTransaksiBng: "1",
+            });
+            setModalOpen(true);
+          }}
+        >
+          + Tambah Bangunan
+        </Button>
+      </Box>
+
+      <TableContainer
+        sx={{
+          border: "1px solid #ddd",
+          borderRadius: 1,
+          overflow: "hidden",
+        }}
+      >
+        <Table>
+          <TableHead sx={{ bgcolor: "#f5f5f5" }}>
+            <TableRow>
+              <TableCell align="center" sx={{ color: "red" }}>
+                No Bangunan
+              </TableCell>
+              <TableCell align="center" sx={{ color: "red" }}>
+                Jenis Bangunan
+              </TableCell>
+              <TableCell align="center" sx={{ color: "red" }}>
+                Luas Bangunan
+              </TableCell>
+              <TableCell align="center" sx={{ color: "red" }}>
+                Jumlah Lantai
+              </TableCell>
+              <TableCell align="center" sx={{ color: "red" }}>
+                Tahun Dibangun
+              </TableCell>
+              <TableCell align="center" sx={{ color: "red" }}>
+                Aksi
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {lspopData ? (
+              lspopData.map((building: any, index: number) => (
+                <TableRow key={index}>
+                  <TableCell align="center">{building.no_bng}</TableCell>
+                  <TableCell align="center">{kodeJpb[parseInt(building.kd_jpb) - 1]}</TableCell>
+                  <TableCell align="center">{building.bng_luas} m²</TableCell>
+                  <TableCell align="center">{building.bng_jml_lantai}</TableCell>
+                  <TableCell align="center">{building.bng_thn_dibangun}</TableCell>
+                  <TableCell align="center">
+                    <IconButton onClick={() => handleEdit(building)}>
+                      <EditIcon color="primary" />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(building.no_bng)}>
+                      <DeleteIcon color="error" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  Belum ada data bangunan
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <BuildingModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSave} building={currentBuilding} nextNoBng={currentBuilding.no_bng} />
+    </Box>
+  );
+};

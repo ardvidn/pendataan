@@ -8,7 +8,7 @@ const SidebarItem = ({ open, useIcon, title, link }: { open: boolean; useIcon: a
   const router = useRouter();
   const pathname = usePathname();
 
-  const isActive = pathname === `/${link}`;
+  const isActive = pathname.startsWith(`/${link}`);
 
   return (
     <ListItem
@@ -17,7 +17,6 @@ const SidebarItem = ({ open, useIcon, title, link }: { open: boolean; useIcon: a
       sx={{
         display: "block",
         bgcolor: isActive ? "#FFC107" : "transparent", // Warna latar belakang jika aktif
-        // borderRadius: "8px",
       }}
       onClick={() => router.push(`/${link}`)}
     >

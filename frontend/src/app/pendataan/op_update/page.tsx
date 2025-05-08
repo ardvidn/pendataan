@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { Box, Button, Divider, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Button, Divider, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import React, { useCallback, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
@@ -11,28 +12,60 @@ import { formatNop } from "@/utils/formatNOP";
 import { validateNOP } from "@/utils/validateNOP";
 import { useRouter } from "next/navigation";
 import { getJenisBumiLabel } from "@/utils/labelData";
+import { formatRibuan } from "@/utils/FormatForm";
+import toast, { Toaster } from "react-hot-toast";
+
+interface dataProps {
+  kd_prov: string;
+  kd_kab: string;
+  kd_kec: string;
+  kd_kel: string;
+  kd_blok: string;
+  no_urut: string;
+  kd_jns_op: string;
+  total_luas_bumi: number;
+  jns_bumi: string;
+  kd_znt: string;
+  user_pelayanan: string;
+  tgl_pelayanan: string;
+}
 
 const OpUpdate = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<dataProps[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
   const [nop, setNop] = useState("");
   const [rawNop, setRawNop] = useState("");
   const router = useRouter();
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdate`);
-      setData(response.data.data);
-    } catch (error) {
-      console.error("Error fetching  data:", error);
-    }
-  };
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchSearchData = async () => {
+  const fetchData = useCallback(
+    async (page = 1, limit = itemsPerPage) => {
+      try {
+        const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdate?page=${page}&limit=${limit}`);
+        setData(response.data.data);
+        setTotalItems(response.data.total);
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(page);
+      } catch (error) {
+        console.error("Error fetching  data:", error);
+      }
+    },
+    [itemsPerPage]
+  );
+
+  const fetchSearchData = async (page = 1, limit = itemsPerPage) => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdatebynop?nop=${rawNop}`);
-      setData([response.data.data]);
+      const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdatebysearch?nop=${rawNop}&page=${page}&limit=${limit}`);
+      setData(response.data.data);
+      setTotalItems(response.data.total);
+      setTotalPages(response.data.totalPages);
+      setCurrentPage(page);
       setIsSearching(true);
     } catch (error) {
       console.error("Error fetching search data:", error);
@@ -43,11 +76,7 @@ const OpUpdate = () => {
   // Ambil data saat pertama kali load
   useEffect(() => {
     fetchData();
-  }, []);
-
-  useEffect(() => {
-    console.log("Data updated:", data);
-  }, [data]);
+  }, [fetchData]);
 
   // handle on change search nop
   const handleNopChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,10 +89,25 @@ const OpUpdate = () => {
     if (!value) {
       setError(""); // Hapus error jika input kosong
       setIsSearching(false);
+      fetchData();
     } else if (formattedNop.length === 24 && validateNOP(formattedNop)) {
       setError("");
     } else {
       setError("Format NOP tidak valid (XX.XX.XXX.XXX.XXX.XXXX.X)");
+    }
+  };
+
+  const handleItemsPerPageChange = (e: any) => {
+    const newItemsPerPage = e.target.value;
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (isSearching) {
+      fetchSearchData(newPage, itemsPerPage);
+    } else {
+      fetchData(newPage, itemsPerPage);
     }
   };
 
@@ -82,9 +126,26 @@ const OpUpdate = () => {
     router.push("/pendataan/op_update/search_nop");
   };
 
+  const handleEditButton = (nop: string) => {
+    router.push(`/pendataan/op_update/${nop}?source=edit`);
+  };
+
+  const handleDeleteButton = async (nop: string) => {
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/deleteobjekpajak/${nop}`);
+      toast.success(`berhasil menghapus data!!!`);
+    } catch (error) {
+      toast.error("error saat menghapus data!!!");
+      console.error("Error delete data:", error);
+    } finally {
+      fetchData();
+    }
+  };
+
   return (
     <>
-      <Box width={"fullwidth"} height={"95vh"} sx={{ backgroundColor: "#FFF", borderRadius: "16px" }}>
+      <Toaster position="top-center" />
+      <Box width={"fullwidth"} height={"100tvh"} sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
         <Box display={"flex"} justifyContent="center" alignItems="center">
           <Box sx={{ paddingY: "20px", paddingX: "24px", color: "#000", borderRadius: "16px" }} width={{ md: "40vw" }}>
             <Typography sx={{ paddingBottom: "20px", textAlign: "center" }}>PENCARIAN NOP</Typography>
@@ -103,16 +164,30 @@ const OpUpdate = () => {
                 error={!!error}
                 helperText={error}
                 onKeyDown={handleKeyDown}
+                onBlur={() => {
+                  // Jika kosong, hapus error
+                  if (!nop) {
+                    setError("");
+                  } else {
+                    // Atau lakukan validasi ulang di sini jika perlu
+                    const isValid = /^\d{16}$/.test(nop);
+                    setError(isValid ? "" : "Format NOP harus 16 digit angka.");
+                  }
+                }}
               />
 
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
-                onClick={fetchSearchData}
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent default form submission if needed
+                  fetchSearchData(); // Call with default parameters
+                }}
                 // disabled={!isLoggedIn || loading}
                 sx={{
-                  mt: { xs: 2, md: 0 },
+                  mt: { xs: 1, md: 0 },
+                  ml: { xs: 2, md: 0 },
                   maxWidth: 100,
                   bgcolor: "#FFC107",
                   color: "#000",
@@ -155,66 +230,93 @@ const OpUpdate = () => {
             Update
           </Button>
         </Box>
-        <Box display="flex" justifyContent="center" alignItems="center">
-          <TableContainer component={Paper} sx={{ mt: 3, width: "70vw" }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
-                    NOP
-                  </TableCell>
-                  <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
-                    Luas Bumi
-                  </TableCell>
-                  <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
-                    Jenis Bumi
-                  </TableCell>
-                  <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
-                    kode ZNT
-                  </TableCell>
-                  <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
-                    Petugas
-                  </TableCell>
-                  <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
-                    Tanggal Input
-                  </TableCell>
-                  <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
-                    Aksi
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data && data.length > 0 ? (
-                  data.map((row, index) => (
-                    <TableRow key={index}>
-                      <TableCell align="center">
-                        {row.kd_prov}.{row.kd_kab}.{row.kd_kec}.{row.kd_kel}.{row.kd_blok}.{row.no_urut}.{row.kd_jns_op}
-                      </TableCell>
-                      <TableCell align="center">{row.total_luas_bumi}</TableCell>
-                      <TableCell align="center">{getJenisBumiLabel(row.jns_bumi)}</TableCell>
-                      <TableCell align="center">{row.kd_znt}</TableCell>
-                      <TableCell align="center">{row.user_pelayanan}</TableCell>
-                      <TableCell align="center">{moment(row.tgl_pelayanan).format("DD MMMM YYYY")}</TableCell>
-                      <TableCell align="center">
-                        <IconButton sx={{ color: "#219EBC" }}>
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton sx={{ color: "#FB8500" }}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
+        <Box display="flex" flexDirection={"column"} justifyContent="center" alignItems="center">
+          <Box sx={{ width: "100%", overflowX: "auto" }}>
+            <TableContainer component={Paper} sx={{ mt: 3, minWidth: "700px" }}>
+              <Table>
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={7} align="center">
-                      Data tidak ditemukan
+                    <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
+                      NOP
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
+                      Luas Bumi
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
+                      Jenis Bumi
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
+                      kode ZNT
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
+                      Petugas
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
+                      Tanggal Input
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#023047", fontWeight: "bold" }}>
+                      Aksi
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {data && data.length > 0 ? (
+                    data.map((row, index) => (
+                      <TableRow key={index}>
+                        <TableCell align="center">
+                          {row.kd_prov}.{row.kd_kab}.{row.kd_kec}.{row.kd_kel}.{row.kd_blok}.{row.no_urut}.{row.kd_jns_op}
+                        </TableCell>
+                        <TableCell align="center">{formatRibuan(row.total_luas_bumi)}</TableCell>
+                        <TableCell align="center">{getJenisBumiLabel(row.jns_bumi)}</TableCell>
+                        <TableCell align="center">{row.kd_znt}</TableCell>
+                        <TableCell align="center">{row.user_pelayanan}</TableCell>
+                        <TableCell align="center">{moment(row.tgl_pelayanan).format("DD MMMM YYYY")}</TableCell>
+                        <TableCell align="center">
+                          <IconButton sx={{ color: "#219EBC" }} onClick={() => handleEditButton(`${row.kd_prov}${row.kd_kab}${row.kd_kec}${row.kd_kel}${row.kd_blok}${row.no_urut}${row.kd_jns_op}`)}>
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton sx={{ color: "#FB8500" }} onClick={() => handleDeleteButton(`${row.kd_prov}${row.kd_kab}${row.kd_kec}${row.kd_kel}${row.kd_blok}${row.no_urut}${row.kd_jns_op}`)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center">
+                        Data tidak ditemukan
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+          {/* Pagination Controls */}
+          <Box display="flex" justifyContent="space-between" alignItems="center" p={2} mt={2}>
+            <Typography variant="body2">{`${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, totalItems)} of ${totalItems}`}</Typography>
+
+            <Box display="flex" alignItems="center" gap={2}>
+              <FormControl size="small" sx={{ minWidth: 80 }}>
+                <InputLabel>Show</InputLabel>
+                <Select value={itemsPerPage} onChange={handleItemsPerPageChange} label="Show">
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={25}>25</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                </Select>
+              </FormControl>
+
+              <Box display="flex" gap={1}>
+                <Button variant="outlined" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
+                  Previous
+                </Button>
+                <Button variant="outlined" disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+                  Next
+                </Button>
+              </Box>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </>
