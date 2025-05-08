@@ -108,26 +108,46 @@
 //   }
 // }
 
+// {
+//   "compilerOptions": {
+//     "target": "ES2015",
+//     "module": "commonjs",
+//     "strict": true,
+//     "esModuleInterop": true,
+//     "allowSyntheticDefaultImports": true,
+//     "noImplicitAny": false,
+//     "skipLibCheck": true,
+//     "forceConsistentCasingInFileNames": true,
+//     "outDir": "./dist",
+//     "rootDir": "./src",
+//     "baseUrl": "./src",
+//     "paths": {
+//       "@/*": ["*"]
+//     },
+//     "emitDecoratorMetadata": true,
+//     "experimentalDecorators": true
+//   },
+//   // "include": ["src/**/*"],
+//   "include": ["**/*.ts"],
+//   "exclude": ["node_modules", "dist"]
+// }
+
 {
   "compilerOptions": {
-    "target": "ES2015",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false,
-    "skipLibCheck": true,
+    "target": "es2016" /* Menargetkan ES2016 atau lebih tinggi untuk mendukung array.includes */,
+    "module": "commonjs" /* Format modul untuk output */,
+    "esModuleInterop": true /* Memungkinkan import untuk modul CommonJS */,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["*"]
-    },
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "./dist" /* Direktori output untuk file JS */,
+    "rootDir": "./src" /* Direktori root untuk file sumber */,
+    "moduleResolution": "node" /* Strategi resolusi modul */,
+    "resolveJsonModule": true /* Memungkinkan import file JSON */,
+    "declaration": true /* Menghasilkan file deklarasi .d.ts */,
+    "sourceMap": true /* Menghasilkan sourcemap */,
+    "lib": ["es2016", "dom"] /* Library yang digunakan */
   },
-  // "include": ["src/**/*"],
-  "include": ["**/*.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
