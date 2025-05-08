@@ -146,7 +146,9 @@
     "resolveJsonModule": true /* Memungkinkan import file JSON */,
     "declaration": true /* Menghasilkan file deklarasi .d.ts */,
     "sourceMap": true /* Menghasilkan sourcemap */,
-    "lib": ["es2016", "dom"] /* Library yang digunakan */
+    "lib": ["es2016", "dom"] /* Library yang digunakan */,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
