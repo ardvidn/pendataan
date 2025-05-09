@@ -21,7 +21,7 @@ export default function LoginPage() {
 
       toast.success("Login berhasil!");
 
-      router.push("/pendataan"); //maps
+      router.push("/pendataan/op_update"); //maps
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login gagal!");

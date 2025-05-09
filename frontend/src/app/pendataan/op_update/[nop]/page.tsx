@@ -61,6 +61,9 @@ export default function UpdateNOPForm() {
           const fotoResponse = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getfotopersil/${paramsNOP.nop}`);
           const imageUrls = fotoResponse.data.imageUrls;
 
+          if (fotoResponse.data.isEmpty === true) {
+            return;
+          }
           // Inject ke spopData
           setSpopData((prev) => ({
             ...prev,

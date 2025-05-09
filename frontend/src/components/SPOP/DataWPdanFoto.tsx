@@ -380,15 +380,15 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
 
             <Box display="flex" gap={2}>
               <Autocomplete fullWidth options={provinsiOptions} value={wajibPajak.kd_provinsi || valueProvinsi} onChange={handleOnChangeKabupaten} renderInput={(params) => <TextField {...params} label="Provinsi" />} />
-              <Autocomplete fullWidth options={kabupatenOptionsFiltered} value={valueKabupaten || wajibPajak.kd_kabupaten} onChange={handleOnChangeKecamatan} renderInput={(params) => <TextField {...params} label="Kabupaten" />} />
+              <Autocomplete fullWidth options={kabupatenOptionsFiltered} value={valueKabupaten ?? wajibPajak.kd_kabupaten ?? null} onChange={handleOnChangeKecamatan} renderInput={(params) => <TextField {...params} label="Kabupaten" />} />
             </Box>
 
             <Box display="flex" gap={2} mt={2}>
-              <Autocomplete fullWidth options={kecamatanOptionsFiltered} value={valueKecamatan || wajibPajak.kd_kecamatan} onChange={handleOnChangeKelurahan} renderInput={(params) => <TextField {...params} label="Kecamatan" />} />
+              <Autocomplete fullWidth options={kecamatanOptionsFiltered} value={valueKecamatan ?? wajibPajak.kd_kecamatan ?? null} onChange={handleOnChangeKelurahan} renderInput={(params) => <TextField {...params} label="Kecamatan" />} />
               <Autocomplete
                 fullWidth
                 options={kelurahanOptionsFiltered}
-                value={valueKelurahan || wajibPajak.kd_kelurahan}
+                value={valueKelurahan ?? wajibPajak.kd_kelurahan ?? null}
                 onChange={(e, newValue) => {
                   setValueKelurahan(newValue);
                   setWajibPajak(() => ({ ...wajibPajak, kd_kelurahan: newValue || "" }));
