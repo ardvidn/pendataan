@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { NextFunction, Request, Response, urlencoded } from "express";
 import cors from "cors";
 import apiRouter from "./router/api.router";
 import "reflect-metadata";
@@ -12,6 +12,7 @@ const app = express();
 app.use(cookieParser(process.env.COOKIES_SECRET));
 app.use(express.json());
 app.use(cors({ origin: [`${process.env.CLIENT_URL}`], methods: "GET,POST,PUT,DELETE", allowedHeaders: "Content-Type,Authorization", credentials: true }));
+app.use(urlencoded({ extended: true }));
 app.use("/api", apiRouter);
 app.use("/public", express.static("./public"));
 
