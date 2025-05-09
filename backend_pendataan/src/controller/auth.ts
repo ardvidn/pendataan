@@ -96,7 +96,7 @@ export const login = async (req: Request, res: Response) => {
 // **Logout** (Menghapus token di frontend)
 export const logout = async (req: Request, res: Response) => {
   res.clearCookie("user-cookies", {
-    httpOnly: false,
+    httpOnly: true,
     secure: true,
     path: "/",
     sameSite: "none",
