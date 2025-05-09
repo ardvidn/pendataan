@@ -80,6 +80,7 @@ export const login = async (req: Request, res: Response) => {
       secure: true, // Aktifkan hanya di HTTPS
       sameSite: "none",
       expires: dayjs().add(1, "day").toDate(),
+      domain: process.env.CLIENT_URL,
     });
 
     return res.status(200).json({
