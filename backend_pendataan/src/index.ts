@@ -3,10 +3,7 @@ import cors from "cors";
 import apiRouter from "./router/api.router";
 import "reflect-metadata";
 import { AppDataSource } from "./data-resource";
-import * as dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-
-dotenv.config();
 
 const app = express();
 app.use(cookieParser(process.env.COOKIES_SECRET));
