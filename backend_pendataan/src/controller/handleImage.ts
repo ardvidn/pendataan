@@ -97,9 +97,10 @@ export const GetFotoPersil = async (req: Request, res: Response) => {
     const imageUrls = result.resources.map((file: any) => file.secure_url);
 
     if (imageUrls.length === 0) {
-      return res.status(404).json({
-        code: 404,
-        message: "Image not found",
+      return res.status(200).json({
+        code: 200,
+        message: "Image empty",
+        isEmpty: true,
       });
     }
 
