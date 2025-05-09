@@ -78,9 +78,8 @@ export const login = async (req: Request, res: Response) => {
     res.cookie("user-cookies", token, {
       httpOnly: true, // Mencegah akses dari JavaScript
       secure: true, // Aktifkan hanya di HTTPS
-      sameSite: "none",
+      sameSite: "lax",
       expires: dayjs().add(1, "day").toDate(),
-      domain: process.env.CLIENT_URL,
     });
 
     return res.status(200).json({
