@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Typography, TextField } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,9 +13,10 @@ interface lspopProps {
   lspopData: any;
   setLspopData: React.Dispatch<React.SetStateAction<any>>;
   nop: string;
+  onValidityChange: (isValid: boolean) => void;
 }
 
-export const LSPOPForm = ({ nop, lspopData, setLspopData }: lspopProps) => {
+export const LSPOPForm = ({ nop, lspopData, setLspopData, onValidityChange }: lspopProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [currentBuilding, setCurrentBuilding] = useState<BuildingData>({
     no_bng: "",
@@ -62,6 +63,11 @@ export const LSPOPForm = ({ nop, lspopData, setLspopData }: lspopProps) => {
     const maxNo = usedNumbers.length ? Math.max(...usedNumbers) : 0;
     return (maxNo + 1).toString(); // contoh hasil: "001", "002", ...
   };
+
+  useEffect(() => {
+    const isValid = lspopData.length !== 0;
+    onValidityChange(isValid);
+  }, [lspopData.length, onValidityChange]);
 
   return (
     <Box sx={{ p: 3 }}>

@@ -14,6 +14,7 @@ interface GeoInputWithMapProps {
   setLongitude: React.Dispatch<React.SetStateAction<any>>;
   spopData: any;
   setSpopData: React.Dispatch<React.SetStateAction<any>>;
+  onValidityChange: (isValid: boolean) => void;
 }
 
 // Default Leaflet marker config
@@ -32,7 +33,7 @@ const RecenterMap = ({ position }: { position: [number, number] }) => {
   return null;
 };
 
-export default function GeoInputWithMap({ latitude, longitude, setLatitude, setLongitude }: GeoInputWithMapProps) {
+export default function GeoInputWithMap({ latitude, longitude, setLatitude, setLongitude, onValidityChange }: GeoInputWithMapProps) {
   const [position, setPosition] = useState<[number, number]>([parseFloat(latitude), parseFloat(longitude)]);
   const [isDraggable, setIsDraggable] = useState(false);
   const [address, setAddress] = useState("");
@@ -61,6 +62,11 @@ export default function GeoInputWithMap({ latitude, longitude, setLatitude, setL
       setLoadingAddress(false);
     }
   };
+
+  useEffect(() => {
+    const isValid = latitude !== 0 && longitude !== 0;
+    onValidityChange(isValid);
+  }, [latitude, longitude, onValidityChange]);
 
   const handleGeoTag = () => {
     if (!navigator.geolocation) return alert("Geolocation tidak didukung browser ini.");

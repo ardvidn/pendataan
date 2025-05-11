@@ -145,7 +145,7 @@ const OpUpdate = () => {
   return (
     <>
       <Toaster position="top-center" />
-      <Box width={"fullwidth"} height={"100tvh"} sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
+      <Box width={"fullwidth"} height={"100%"} sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
         <Box display={"flex"} justifyContent="center" alignItems="center">
           <Box sx={{ paddingY: "20px", paddingX: "24px", color: "#000", borderRadius: "16px" }} width={{ md: "40vw" }}>
             <Typography sx={{ paddingBottom: "20px", textAlign: "center" }}>PENCARIAN NOP</Typography>
@@ -187,8 +187,8 @@ const OpUpdate = () => {
                 // disabled={!isLoggedIn || loading}
                 sx={{
                   mt: { xs: 1, md: 0 },
-                  ml: { xs: 2, md: 0 },
-                  maxWidth: 100,
+                  ml: { xs: 0, md: 0 },
+                  maxWidth: 70,
                   bgcolor: "#FFC107",
                   color: "#000",
                   "&:hover": {
@@ -231,8 +231,8 @@ const OpUpdate = () => {
           </Button>
         </Box>
         <Box display="flex" flexDirection={"column"} justifyContent="center" alignItems="center">
-          <Box sx={{ width: "100%", overflowX: "auto" }}>
-            <TableContainer component={Paper} sx={{ mt: 3, minWidth: "700px" }}>
+          <Box sx={{ width: "70vw" }}>
+            <TableContainer component={Paper} sx={{ mt: 3 }}>
               <Table>
                 <TableHead>
                   <TableRow>

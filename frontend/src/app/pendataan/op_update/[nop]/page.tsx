@@ -12,6 +12,7 @@ import { preparePayload } from "../../../../utils/FormPayload";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { logged, ResponseData } from "../../../../utils/interface";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const steps = ["SPOP", "LSPOP", "Lokasi"];
 
@@ -24,6 +25,9 @@ export default function UpdateNOPForm() {
   const [longitude, setLongitude] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState("");
+  const [isSpopValid, setIsSpopValid] = useState(false);
+  const [isLspopValid, setIsLspopValid] = useState(false);
+  const [isGeoValid, setIsGeoValid] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -90,7 +94,19 @@ export default function UpdateNOPForm() {
       .catch(() => router.push("/login"));
   }, [router]);
 
+  const isCurrentStepValid = () => {
+    if (activeStep === 0) return isSpopValid;
+    if (activeStep === 1 && !isTanahKosong) return isLspopValid;
+    if (activeStep === 2 || (activeStep === 1 && isTanahKosong)) return isGeoValid;
+    return true;
+  };
+
   const handleNext = async () => {
+    if (!isCurrentStepValid()) {
+      toast.error("Mohon lengkapi data pada step ini sebelum melanjutkan.");
+      return;
+    }
+
     const isLastStep = isTanahKosong ? activeStep === steps.length - 1 : activeStep === steps.length - 1;
 
     if (isLastStep) {
@@ -135,6 +151,10 @@ export default function UpdateNOPForm() {
     }
   };
 
+  const handleGoToBack = () => {
+    router.push("/pendataan/op_update");
+  };
+
   if (isLoading) return <Typography>Loading...</Typography>;
 
   return (
@@ -153,11 +173,30 @@ export default function UpdateNOPForm() {
             })}
           </Stepper>
 
-          {activeStep === 0 && <SPOPForm nop={paramsNOP.nop} spopData={spopData} setSpopData={setSpopData} isLoading={isLoading} wajibPajak={wajibPajak} setWajibPajak={setWajibPajak} />}
+          <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: "#FFC107",
+                color: "#000",
+                "&:hover": {
+                  bgcolor: "#E0A800",
+                },
+              }}
+              startIcon={<ArrowBackIcon />}
+              onClick={handleGoToBack}
+            >
+              Kembali
+            </Button>
+          </Box>
 
-          {activeStep === 1 && !isTanahKosong && <LSPOPForm nop={paramsNOP.nop} lspopData={lspopData} setLspopData={setLspopData} />}
+          {activeStep === 0 && <SPOPForm nop={paramsNOP.nop} spopData={spopData} setSpopData={setSpopData} isLoading={isLoading} wajibPajak={wajibPajak} setWajibPajak={setWajibPajak} onValidityChange={setIsSpopValid} />}
 
-          {(activeStep === 2 || (activeStep === 1 && isTanahKosong)) && <GeoInputWithMap latitude={latitude} longitude={longitude} setLatitude={setLatitude} setLongitude={setLongitude} spopData={spopData} setSpopData={setSpopData} />}
+          {activeStep === 1 && !isTanahKosong && <LSPOPForm nop={paramsNOP.nop} lspopData={lspopData} setLspopData={setLspopData} onValidityChange={setIsLspopValid} />}
+
+          {(activeStep === 2 || (activeStep === 1 && isTanahKosong)) && (
+            <GeoInputWithMap latitude={latitude} longitude={longitude} setLatitude={setLatitude} setLongitude={setLongitude} spopData={spopData} setSpopData={setSpopData} onValidityChange={setIsGeoValid} />
+          )}
 
           <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
             <Button
@@ -168,7 +207,7 @@ export default function UpdateNOPForm() {
               Back
             </Button>
             <Box sx={{ flex: "1 1 auto" }} />
-            <Button onClick={handleNext} sx={{ backgroundColor: "#219EBC", color: "#FFF" }}>
+            <Button onClick={handleNext} sx={{ backgroundColor: "#219EBC", color: "#FFF" }} disabled={!isCurrentStepValid()}>
               {isTanahKosong ? (activeStep === steps.length - 1 ? "Finish" : "Next") : activeStep === steps.length - 1 ? "Finish" : "Next"}
             </Button>
           </Box>

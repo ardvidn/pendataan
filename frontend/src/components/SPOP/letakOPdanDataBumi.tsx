@@ -8,7 +8,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface LetakOPdanDataBumiProps {
   spopData: any;
@@ -19,8 +19,14 @@ interface LetakOPdanDataBumiProps {
   handleRadioChange: any;
   zntOptions: string[];
   showLahanKeterangan: boolean;
+  onValidityChange: (isValid: boolean) => void;
 }
-const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSpopData, zntOptions, showLahanKeterangan }) => {
+const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSpopData, zntOptions, showLahanKeterangan, onValidityChange }) => {
+  useEffect(() => {
+    const isValid = spopData.jalan_op && spopData.total_luas_bumi && spopData.kd_znt && spopData.jns_bumi && spopData.jns_peruntukan && spopData.jns_asaltanah && spopData.kd_status_wp && spopData.kd_status_cabang; // contoh field
+    onValidityChange(isValid);
+  }, [onValidityChange, spopData]);
+
   return (
     <>
       <Box flex={1} minWidth="48%" mx={2}>
@@ -65,7 +71,7 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
         </Box>
 
         <Box mt={2}>
-          <TextField fullWidth label="Alamat" name="jalanOp" value={spopData.jalan_op || ""} onChange={(e) => setSpopData({ ...spopData, ["jalan_op"]: e.target.value })} />
+          <TextField required fullWidth label="Alamat" name="jalanOp" value={spopData.jalan_op || ""} onChange={(e) => setSpopData({ ...spopData, ["jalan_op"]: e.target.value })} />
         </Box>
 
         <Box mt={2}>
@@ -103,14 +109,14 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
             options={statusWpOptions}
             value={spopData.kd_status_wp || ""}
             onChange={(e, newValue) => setSpopData({ ...spopData, ["kd_status_wp"]: newValue })}
-            renderInput={(params) => <TextField {...params} label="Status WP" fullWidth />}
+            renderInput={(params) => <TextField required {...params} label="Status WP" fullWidth />}
           />
         </Box>
 
         <Box mt={2}>
           <FormControl fullWidth>
-            <FormLabel>Status Cabang</FormLabel>
-            <RadioGroup row name="statusCabang" value={spopData.kd_status_cabang || "Bukan Cabang"} onChange={(e) => setSpopData({ ...spopData, ["kd_status_cabang"]: e.target.value })}>
+            <FormLabel required>Status Cabang</FormLabel>
+            <RadioGroup row name="statusCabang" value={spopData.kd_status_cabang || ""} onChange={(e) => setSpopData({ ...spopData, ["kd_status_cabang"]: e.target.value })}>
               <FormControlLabel value="Cabang" control={<Radio />} label="Cabang" sx={{ color: "#000" }} />
               <FormControlLabel value="Bukan Cabang" control={<Radio />} label="Bukan Cabang" sx={{ color: "#000" }} />
             </RadioGroup>
@@ -124,8 +130,14 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
         <Divider />
 
         <Box display="flex" gap={2} mt={2}>
-          <TextField fullWidth label="Luas Bumi" name="luasBumi" type="number" value={spopData.total_luas_bumi || ""} onChange={(e) => setSpopData({ ...spopData, ["kd_status_cabang"]: e.target.value })} />
-          <Autocomplete fullWidth options={zntOptions} value={spopData.kd_znt || ""} onChange={(e, newValue) => setSpopData({ ...spopData, ["kd_znt"]: newValue })} renderInput={(params) => <TextField {...params} label="ZNT" fullWidth />} />
+          <TextField required fullWidth label="Luas Bumi" name="luasBumi" type="number" value={spopData.total_luas_bumi || ""} onChange={(e) => setSpopData({ ...spopData, ["kd_status_cabang"]: e.target.value })} />
+          <Autocomplete
+            fullWidth
+            options={zntOptions}
+            value={spopData.kd_znt || ""}
+            onChange={(e, newValue) => setSpopData({ ...spopData, ["kd_znt"]: newValue })}
+            renderInput={(params) => <TextField required {...params} label="ZNT" fullWidth />}
+          />
         </Box>
 
         <Box display="flex" gap={2} mt={2}>
@@ -134,7 +146,7 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
             options={jenisBumiOptions.map((item) => item.label)}
             value={getLabelFromKode(jenisBumiOptions, spopData.jns_bumi) || ""}
             onChange={(e, newValue) => setSpopData({ ...spopData, ["kd_status_wp"]: getKodeFromLabel(jenisBumiOptions, newValue || "") })}
-            renderInput={(params) => <TextField {...params} label="Jenis Bumi" fullWidth />}
+            renderInput={(params) => <TextField required {...params} label="Jenis Bumi" fullWidth />}
           />
 
           <Autocomplete
@@ -142,7 +154,7 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
             options={jenisPeruntukanOptions}
             value={spopData.jns_peruntukan || ""}
             onChange={(e, newValue) => setSpopData({ ...spopData, ["jns_peruntukan"]: newValue })}
-            renderInput={(params) => <TextField {...params} label="Jenis Peruntukan" fullWidth />}
+            renderInput={(params) => <TextField required {...params} label="Jenis Peruntukan" fullWidth />}
           />
         </Box>
 
@@ -151,7 +163,7 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
             options={jenisAsalTanahOptions}
             value={spopData.jns_asaltanah || ""}
             onChange={(e, newValue) => setSpopData({ ...spopData, ["jns_asaltanah"]: newValue })}
-            renderInput={(params) => <TextField {...params} label="Jenis Asal Tanah" fullWidth />}
+            renderInput={(params) => <TextField required {...params} label="Jenis Asal Tanah" fullWidth />}
           />
         </Box>
 

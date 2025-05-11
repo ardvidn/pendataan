@@ -2,7 +2,7 @@
 import { isMaxDigitsValid, isTeleponValid } from "../../utils/FormatForm";
 import { jenisBadanUsahaOptions, jenisIdentitasOptions, jenisKelaminOptions, jenisWpOptions, pekerjaanOptions } from "../../utils/labelData";
 import { Autocomplete, Box, Divider, TextField, Typography } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import UploadFotoPersilBox from "../uploadImage";
 import { getValueByKey } from "../../utils/optionsHelper";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -38,6 +38,7 @@ interface DataWPdanFotoProps {
   wajibPajak: any;
   setSpopData: any;
   spopData: any;
+  onValidityChange: (isValid: boolean) => void;
 }
 
 const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
@@ -64,7 +65,39 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
   wajibPajak,
   setSpopData,
   spopData,
+  onValidityChange,
 }) => {
+  useEffect(() => {
+    const isValid =
+      spopData.jns_wp === "ORANG PRIBADI"
+        ? wajibPajak.jns_wp &&
+          wajibPajak.no_identitas &&
+          wajibPajak.jns_identitas &&
+          wajibPajak.nm_wp &&
+          wajibPajak.jns_kelamin_wp &&
+          wajibPajak.tempat_lahir_wp &&
+          wajibPajak.tanggal_lahir_wp &&
+          wajibPajak.alamat_wp &&
+          wajibPajak.kd_provinsi &&
+          wajibPajak.kd_kabupaten &&
+          wajibPajak.kd_kecamatan &&
+          wajibPajak.kd_kelurahan &&
+          wajibPajak.pekerjaan_wp
+        : wajibPajak.jns_wp &&
+          wajibPajak.no_identitas &&
+          wajibPajak.jns_identitas &&
+          wajibPajak.nm_wp &&
+          wajibPajak.alamat_wp &&
+          wajibPajak.kd_provinsi &&
+          wajibPajak.kd_kabupaten &&
+          wajibPajak.kd_kecamatan &&
+          wajibPajak.kd_kelurahan &&
+          wajibPajak.nm_penanggung_jawab &&
+          wajibPajak.posisi_penanggung_jawab &&
+          wajibPajak.alamat_wp &&
+          wajibPajak.pekerjaan_wp; // contoh field
+    onValidityChange(isValid);
+  }, [onValidityChange, spopData.jns_wp, wajibPajak]);
   return (
     <>
       <Box flex={1} minWidth="48%" mx={2}>
@@ -78,7 +111,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
             options={Object.values(jenisWpOptions)}
             value={getValueByKey(jenisWpOptions, wajibPajak.jns_wp) || ""}
             onChange={(e, value) => setWajibPajak({ ...wajibPajak, ["jns_wp"]: value })}
-            renderInput={(params) => <TextField {...params} label="Jenis Wajib Pajak" fullWidth />}
+            renderInput={(params) => <TextField required {...params} label="Jenis Wajib Pajak" fullWidth />}
           />
         </Box>
 
@@ -124,6 +157,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                 }}
                 renderInput={(params) => (
                   <TextField
+                    required
                     {...params}
                     label="No Identitas"
                     //   error={rawInputWajibPajak !== "" && rawInputwajibPajak.replace(/\D/g, "").length !== 20}
@@ -156,16 +190,16 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                     // setDisableNpwp(false);
                   }
                 }}
-                renderInput={(params) => <TextField {...params} label="Jenis Badan Usaha" fullWidth />}
+                renderInput={(params) => <TextField required {...params} label="Jenis Badan Usaha" fullWidth />}
               />
             </Box>
 
             <Box display="flex" gap={2} mt={2}>
-              <TextField fullWidth label={"Nama Wajib Pajak"} type={"text"} value={wajibPajak.nm_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["nm_wp"]: e.target.value })} />
+              <TextField required fullWidth label={"Nama Wajib Pajak"} type={"text"} value={wajibPajak.nm_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["nm_wp"]: e.target.value })} />
             </Box>
 
             <Box mt={2}>
-              <TextField fullWidth label={"Alamat"} type={"text"} value={wajibPajak.alamat_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["alamat_wp"]: e.target.value })} />
+              <TextField required fullWidth label={"Alamat"} type={"text"} value={wajibPajak.alamat_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["alamat_wp"]: e.target.value })} />
             </Box>
             <Box mt={2}>
               <TextField fullWidth label={"Dusun/Lingkungan"} name={"dusun_wp"} type={"text"} value={wajibPajak.dusun_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["dusun_wp"]: e.target.value })} />
@@ -194,12 +228,12 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
             </Box>
 
             <Box display="flex" gap={2}>
-              <Autocomplete fullWidth options={provinsiOptions} value={wajibPajak.kd_provinsi || valueProvinsi} onChange={handleOnChangeKabupaten} renderInput={(params) => <TextField {...params} label="Provinsi" />} />
-              <Autocomplete fullWidth options={kabupatenOptionsFiltered} value={wajibPajak.kd_kabupaten || valueKabupaten} onChange={handleOnChangeKecamatan} renderInput={(params) => <TextField {...params} label="Kabupaten" />} />
+              <Autocomplete fullWidth options={provinsiOptions} value={wajibPajak.kd_provinsi || valueProvinsi} onChange={handleOnChangeKabupaten} renderInput={(params) => <TextField required {...params} label="Provinsi" />} />
+              <Autocomplete fullWidth options={kabupatenOptionsFiltered} value={wajibPajak.kd_kabupaten || valueKabupaten} onChange={handleOnChangeKecamatan} renderInput={(params) => <TextField required {...params} label="Kabupaten" />} />
             </Box>
 
             <Box display="flex" gap={2} mt={2}>
-              <Autocomplete fullWidth options={kecamatanOptionsFiltered} value={wajibPajak.kd_kecamatan || valueKecamatan} onChange={handleOnChangeKelurahan} renderInput={(params) => <TextField {...params} label="Kecamatan" />} />
+              <Autocomplete fullWidth options={kecamatanOptionsFiltered} value={wajibPajak.kd_kecamatan || valueKecamatan} onChange={handleOnChangeKelurahan} renderInput={(params) => <TextField required {...params} label="Kecamatan" />} />
               <Autocomplete
                 fullWidth
                 options={kelurahanOptionsFiltered}
@@ -208,12 +242,19 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                   setValueKelurahan(newValue);
                   setWajibPajak((prev: any) => ({ ...prev, kd_kelurahan: newValue || "" }));
                 }}
-                renderInput={(params) => <TextField {...params} label="Kelurahan" />}
+                renderInput={(params) => <TextField required {...params} label="Kelurahan" />}
               />
             </Box>
 
             <Box display="flex" gap={2} mt={2}>
-              <TextField fullWidth label={"Nama Penanggung Jawab"} name={"nm_penanggung_jawab"} value={wajibPajak.nm_penanggung_jawab || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["nm_penanggung_jawab"]: e.target.value })} />
+              <TextField
+                required
+                fullWidth
+                label={"Nama Penanggung Jawab"}
+                name={"nm_penanggung_jawab"}
+                value={wajibPajak.nm_penanggung_jawab || ""}
+                onChange={(e) => setWajibPajak({ ...wajibPajak, ["nm_penanggung_jawab"]: e.target.value })}
+              />
               <TextField
                 fullWidth
                 label={"Telepon"}
@@ -229,6 +270,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
 
             <Box display="flex" gap={2}>
               <TextField
+                required
                 fullWidth
                 label={"Posisi Penanggung Jawab"}
                 name={"posisi_penanggung_jawab"}
@@ -284,6 +326,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                 }}
                 renderInput={(params) => (
                   <TextField
+                    required
                     {...params}
                     label="No Identitas"
                     //   error={rawInputWajibPajak !== "" && rawInputwajibPajak.replace(/\D/g, "").length !== 20}
@@ -312,23 +355,23 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                     setDisableNoIdentitas(false);
                   }
                 }}
-                renderInput={(params) => <TextField {...params} label="Jenis Identitas" fullWidth />}
+                renderInput={(params) => <TextField required {...params} label="Jenis Identitas" fullWidth />}
               />
             </Box>
 
             <Box display="flex" gap={2} mt={2}>
-              <TextField fullWidth label={"Nama Wajib Pajak"} type={"text"} value={wajibPajak.nm_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["nm_wp"]: e.target.value })} />
+              <TextField required fullWidth label={"Nama Wajib Pajak"} type={"text"} value={wajibPajak.nm_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["nm_wp"]: e.target.value })} />
               <Autocomplete
                 fullWidth
                 options={jenisKelaminOptions}
                 value={wajibPajak.jns_kelamin_wp || ""}
                 onChange={(e, newValue) => setWajibPajak({ ...wajibPajak, ["jns_kelamin_wp"]: newValue })}
-                renderInput={(params) => <TextField {...params} label="Jenis Kelamin" fullWidth />}
+                renderInput={(params) => <TextField required {...params} label="Jenis Kelamin" fullWidth />}
               />
             </Box>
 
             <Box display="flex" gap={2} mt={2}>
-              <TextField fullWidth label={"Tempat Lahir"} name={"tempatLahir"} type={"text"} value={wajibPajak.tempat_lahir_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["tempat_lahir_wp"]: e.target.value })} />
+              <TextField required fullWidth label={"Tempat Lahir"} name={"tempatLahir"} type={"text"} value={wajibPajak.tempat_lahir_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["tempat_lahir_wp"]: e.target.value })} />
 
               {/* <DateInput label="Tanggal Lahir" name="tanggalLahir" value={wajibPajak.tanggal_lahir_wp || ""} onChange={ (e) =>
                 setWajibPajak({ ...wajibPajak, ["tanggal_lahir_wp"]: e.target.value})
@@ -341,6 +384,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                   }}
                   slotProps={{
                     textField: {
+                      required: true,
                       fullWidth: true,
                       error: false,
                     },
@@ -350,7 +394,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
             </Box>
 
             <Box mt={2}>
-              <TextField fullWidth label={"Alamat"} type={"text"} value={wajibPajak.alamat_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["alamat_wp"]: e.target.value })} />
+              <TextField required fullWidth label={"Alamat"} type={"text"} value={wajibPajak.alamat_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["alamat_wp"]: e.target.value })} />
             </Box>
             <Box mt={2}>
               <TextField fullWidth label={"Dusun/Lingkungan"} name={"dusunWp"} type={"text"} value={wajibPajak.dusun_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["dusun_wp"]: e.target.value })} />
@@ -379,12 +423,24 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
             </Box>
 
             <Box display="flex" gap={2}>
-              <Autocomplete fullWidth options={provinsiOptions} value={wajibPajak.kd_provinsi || valueProvinsi} onChange={handleOnChangeKabupaten} renderInput={(params) => <TextField {...params} label="Provinsi" />} />
-              <Autocomplete fullWidth options={kabupatenOptionsFiltered} value={valueKabupaten ?? wajibPajak.kd_kabupaten ?? null} onChange={handleOnChangeKecamatan} renderInput={(params) => <TextField {...params} label="Kabupaten" />} />
+              <Autocomplete fullWidth options={provinsiOptions} value={wajibPajak.kd_provinsi || valueProvinsi} onChange={handleOnChangeKabupaten} renderInput={(params) => <TextField required {...params} label="Provinsi" />} />
+              <Autocomplete
+                fullWidth
+                options={kabupatenOptionsFiltered}
+                value={valueKabupaten ?? wajibPajak.kd_kabupaten ?? null}
+                onChange={handleOnChangeKecamatan}
+                renderInput={(params) => <TextField required {...params} label="Kabupaten" />}
+              />
             </Box>
 
             <Box display="flex" gap={2} mt={2}>
-              <Autocomplete fullWidth options={kecamatanOptionsFiltered} value={valueKecamatan ?? wajibPajak.kd_kecamatan ?? null} onChange={handleOnChangeKelurahan} renderInput={(params) => <TextField {...params} label="Kecamatan" />} />
+              <Autocomplete
+                fullWidth
+                options={kecamatanOptionsFiltered}
+                value={valueKecamatan ?? wajibPajak.kd_kecamatan ?? null}
+                onChange={handleOnChangeKelurahan}
+                renderInput={(params) => <TextField required {...params} label="Kecamatan" />}
+              />
               <Autocomplete
                 fullWidth
                 options={kelurahanOptionsFiltered}
@@ -393,7 +449,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                   setValueKelurahan(newValue);
                   setWajibPajak(() => ({ ...wajibPajak, kd_kelurahan: newValue || "" }));
                 }}
-                renderInput={(params) => <TextField {...params} label="Kelurahan" />}
+                renderInput={(params) => <TextField required {...params} label="Kelurahan" />}
               />
             </Box>
 
@@ -403,7 +459,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                 options={pekerjaanOptions}
                 value={wajibPajak.pekerjaan_wp || ""}
                 onChange={(e, newValue) => setWajibPajak({ ...wajibPajak, ["pekerjaan_wp"]: newValue })}
-                renderInput={(params) => <TextField {...params} label="Pekerjaan" fullWidth />}
+                renderInput={(params) => <TextField required {...params} label="Pekerjaan" fullWidth />}
               />
               <TextField
                 fullWidth

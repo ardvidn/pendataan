@@ -61,7 +61,7 @@ const SearchNOP = () => {
   return (
     <>
       <Toaster position="top-center" />
-      <Box width={"fullwidth"} height={"95vh"} sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
+      <Box width={"fullwidth"} height={{ sx: "100%", md: "100vh" }} sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
         <Box display="flex" flexDirection="column" alignItems="center" gap={2} p={4}>
           <Typography variant="h5" sx={{ color: "#000" }}>
             Masukkan NOP

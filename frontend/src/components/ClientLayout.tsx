@@ -46,7 +46,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100tvh", width: "100tvw" }}>
+    <Box sx={{ display: "flex", minHeight: "100%", width: "100%" }}>
       {isMobile ? <MobileNavbar username={username} /> : <Sidebar open={open} setOpen={setOpen} />}
       <Box
         component="main"
