@@ -4,7 +4,7 @@ import { jenisWpOptions, pekerjaanOptions } from "./labelData";
 import { getKeyByValue } from "./optionsHelper";
 
 export const preparePayload = (
-  spopData: { user_pelayanan?: string; kd_jns_pelayanan?: string; kd_pelayanan?: string; log_by: any; kd_status_wp?: any; tgl_sertifikat?: any; jns_asaltanah?: any; is_pangan_ternak?: any; tanggal_lahir_wp?: any },
+  spopData: { user_pelayanan?: string; kd_jns_pelayanan?: string; kd_pelayanan?: string; log_by: any; kd_status_wp?: any; tgl_sertifikat?: any; jns_asaltanah?: any; is_pangan_ternak?: any; tanggal_lahir_wp?: any; kd_status_cabang?: any },
   lspopData: any[],
   wajib_pajak: Record<string, any>,
   lat: number,
@@ -18,8 +18,9 @@ export const preparePayload = (
       longitude: long,
       kd_status_wp: spopData.kd_status_wp.label,
       tgl_sertifikat: dayjs(spopData.tgl_sertifikat).format("DD-MM-YYYY") === "Invalid Date" ? null : dayjs(spopData.tgl_sertifikat).format("DD-MM-YYYY"),
-      jns_asaltanah: spopData.jns_asaltanah,
+      jns_asaltanah: spopData.jns_asaltanah.kode,
       is_pangan_ternak: spopData.is_pangan_ternak === "Benar" ? true : false,
+      kd_status_cabang: spopData.kd_status_cabang === "Bukan Cabang" ? false : true,
     },
     wajib_pajak: {
       ...wajib_pajak,
