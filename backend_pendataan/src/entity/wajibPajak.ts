@@ -22,7 +22,7 @@ export class WajibPajak {
   tempat_lahir_wp!: string;
 
   @Column({ type: "date", nullable: true })
-  tanggal_lahir_wp!: Date;
+  tanggal_lahir_wp!: string;
 
   @Column({ type: "text" })
   alamat_wp!: string;
