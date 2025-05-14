@@ -18,15 +18,20 @@ export const getJenisBumiLabel = (value: string) => {
 };
 
 // Mock data for autocomplete options
-export const statusWpOptions = createOptionsFromArray(["PEMILIK", "PENYEWA", "PENGELOLA", "PEMAKAI", "SENGKETA"]);
+export const statusWpOptions = ["PEMILIK", "PENYEWA", "PENGELOLA", "PEMAKAI", "SENGKETA"];
 export const jenisBumiOptions = createOptionsFromArray(["TANAH + BANGUNAN", "KAVLING SIAP BANGUN", "TANAH KOSONG", "FASILITAS UMUM", "LAIN - LAIN"]);
 export const jenisAsalTanahOptions = createOptionsFromArray(["RAWA", "GAMBUT", "DARAT"]);
 export const jenisWpOptions = { "1": "ORANG PRIBADI", "2": "BADAN USAHA" };
+export const jenisWpOptionList = Object.entries(jenisWpOptions).map(([key, label]) => ({
+  key,
+  label,
+}));
 export const jenisIdentitasOptions = ["KTP", "KITAS", "PASSPORT", "RANDOM"];
 export const jenisKelaminOptions = ["LAKI-LAKI", "PEREMPUAN"];
 export const pekerjaanOptions = ["PNS", "ABRI", "PENSIUNAN", "BADAN", "LAINNYA"];
 export const jenisPeruntukanOptions = ["KOMERSIL", "NON KOMERSIL"];
 export const jenisBadanUsahaOptions = ["PT", "CV", "KOPERASI", "YAYASAN", "RANDOM"];
+export const kodeStatusCabangOptions = ["Bukan Cabang", "Cabang"];
 export const kodeJpb = [
   "01 -	PERUMAHAN",
   "02 -	PERKANTORAN SWASTA",

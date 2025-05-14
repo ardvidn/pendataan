@@ -7,16 +7,16 @@ export const preparePayload = (
   spopData: { user_pelayanan?: string; kd_jns_pelayanan?: string; kd_pelayanan?: string; log_by: any; kd_status_wp?: any; tgl_sertifikat?: any; jns_asaltanah?: any; is_pangan_ternak?: any; tanggal_lahir_wp?: any; kd_status_cabang?: any },
   lspopData: any[],
   wajib_pajak: Record<string, any>,
-  lat: number,
-  long: number,
-  nop: string
+  lat?: number,
+  long?: number,
+  nop?: string
 ): any => {
   return {
     dat_op_pajak: {
       ...spopData,
       latitude: lat,
       longitude: long,
-      kd_status_wp: spopData.kd_status_wp.label,
+      kd_status_wp: spopData.kd_status_wp.label || spopData.kd_status_wp,
       tgl_sertifikat: dayjs(spopData.tgl_sertifikat).format("DD-MM-YYYY") === "Invalid Date" ? null : dayjs(spopData.tgl_sertifikat).format("DD-MM-YYYY"),
       jns_asaltanah: spopData.jns_asaltanah.kode,
       is_pangan_ternak: spopData.is_pangan_ternak === "Benar" ? true : false,
@@ -59,3 +59,6 @@ export const preparePayload = (
     }),
   };
 };
+
+// Argument of type '{ user_pelayanan: string; kd_jns_pelayanan: string; kd_pelayanan: string; log_by: string; }' is not assignable to parameter of type '{ nop_asal: string; no_sertifikat: string; nop_relasi: string; dusun_op: any; jalan_op: string; total_luas_bumi: number; total_luas_bng: number; blok_kav_no_op: string; rw_op: string; rt_op: string; ... 16 more ...; kd_status_cabang?: any; }'.
+//   Type '{ user_pelayanan: string; kd_jns_pelayanan: string; kd_pelayanan: string; log_by: string; }' is missing the following properties from type '{ nop_asal: string; no_sertifikat: string; nop_relasi: string; dusun_op: any; jalan_op: string; total_luas_bumi: number; total_luas_bng: number; blok_kav_no_op: string; rw_op: string; rt_op: string; ... 16 more ...; kd_status_cabang?: any; }': nop_asal, no_sertifikat, nop_relasi, dusun_op, and 13 more.

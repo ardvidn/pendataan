@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { isMaxDigitsValid, isTeleponValid } from "../../utils/FormatForm";
-import { jenisBadanUsahaOptions, jenisIdentitasOptions, jenisKelaminOptions, jenisWpOptions, pekerjaanOptions } from "../../utils/labelData";
+import { jenisBadanUsahaOptions, jenisIdentitasOptions, jenisKelaminOptions, jenisWpOptionList, pekerjaanOptions } from "../../utils/labelData";
 import { Autocomplete, Box, Divider, TextField, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import UploadFotoPersilBox from "../uploadImage";
-import { getValueByKey } from "../../utils/optionsHelper";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -68,36 +67,36 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
   onValidityChange,
 }) => {
   useEffect(() => {
-    const isValid =
-      spopData.jns_wp === "ORANG PRIBADI"
-        ? wajibPajak.jns_wp &&
-          wajibPajak.no_identitas &&
-          wajibPajak.jns_identitas &&
-          wajibPajak.nm_wp &&
-          wajibPajak.jns_kelamin_wp &&
-          wajibPajak.tempat_lahir_wp &&
-          wajibPajak.tanggal_lahir_wp &&
-          wajibPajak.alamat_wp &&
-          wajibPajak.kd_provinsi &&
-          wajibPajak.kd_kabupaten &&
-          wajibPajak.kd_kecamatan &&
-          wajibPajak.kd_kelurahan &&
-          wajibPajak.pekerjaan_wp
-        : wajibPajak.jns_wp &&
-          wajibPajak.no_identitas &&
-          wajibPajak.jns_identitas &&
-          wajibPajak.nm_wp &&
-          wajibPajak.alamat_wp &&
-          wajibPajak.kd_provinsi &&
-          wajibPajak.kd_kabupaten &&
-          wajibPajak.kd_kecamatan &&
-          wajibPajak.kd_kelurahan &&
-          wajibPajak.nm_penanggung_jawab &&
-          wajibPajak.posisi_penanggung_jawab &&
-          wajibPajak.alamat_wp &&
-          wajibPajak.pekerjaan_wp; // contoh field
-    onValidityChange(isValid);
-  }, [onValidityChange, spopData.jns_wp, wajibPajak]);
+    if (wajibPajak.jns_wp === "1") {
+      const isValid =
+        wajibPajak.no_identitas &&
+        wajibPajak.jns_identitas &&
+        wajibPajak.nm_wp &&
+        wajibPajak.jns_kelamin_wp &&
+        wajibPajak.alamat_wp &&
+        wajibPajak.kd_provinsi &&
+        wajibPajak.kd_kabupaten &&
+        wajibPajak.kd_kecamatan &&
+        wajibPajak.kd_kelurahan &&
+        wajibPajak.pekerjaan_wp;
+      onValidityChange(isValid);
+    } else {
+      const isValid =
+        wajibPajak.no_identitas &&
+        wajibPajak.jns_identitas &&
+        wajibPajak.nm_wp &&
+        wajibPajak.alamat_wp &&
+        wajibPajak.kd_provinsi &&
+        wajibPajak.kd_kabupaten &&
+        wajibPajak.kd_kecamatan &&
+        wajibPajak.kd_kelurahan &&
+        wajibPajak.nm_penanggung_jawab &&
+        wajibPajak.posisi_penanggung_jawab &&
+        wajibPajak.alamat_wp &&
+        wajibPajak.pekerjaan_wp;
+      onValidityChange(isValid);
+    }
+  }, [onValidityChange, wajibPajak.jns_wp, wajibPajak]);
   return (
     <>
       <Box flex={1} minWidth="48%" mx={2}>
@@ -108,14 +107,18 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
 
         <Box mt={2}>
           <Autocomplete
-            options={Object.values(jenisWpOptions)}
-            value={getValueByKey(jenisWpOptions, wajibPajak.jns_wp) || ""}
-            onChange={(e, value) => setWajibPajak({ ...wajibPajak, ["jns_wp"]: value })}
+            fullWidth
+            options={jenisWpOptionList}
+            getOptionLabel={(option) => option.label}
+            value={jenisWpOptionList.find((item) => item.key === wajibPajak.jns_wp) || null}
+            onChange={(e, newValue) => {
+              setWajibPajak({ ...wajibPajak, jns_wp: newValue?.key || "" });
+            }}
             renderInput={(params) => <TextField required {...params} label="Jenis Wajib Pajak" fullWidth />}
           />
         </Box>
 
-        {wajibPajak.jns_wp === "BADAN USAHA" ? (
+        {wajibPajak.jns_wp === "2" ? (
           <>
             <Box display="flex" gap={2} mt={2}>
               <Autocomplete
@@ -341,6 +344,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
 
               <Autocomplete
                 fullWidth
+                freeSolo
                 options={jenisIdentitasOptions}
                 value={wajibPajak.jns_identitas || ""}
                 onChange={(e, newValue) => {
@@ -349,7 +353,8 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                   if (newValue === "RANDOM") {
                     setRawInputWajibPajak(nop);
                     setWajibPajak({ ...wajibPajak, ["no_identitas"]: nop });
-                    setWajibPajak({ ...wajibPajak, ["nm_wp"]: "" });
+                    setWajibPajak({ ...wajibPajak, ["nm_wp"]: wajibPajak.nm_wp });
+                    setWajibPajak({ ...wajibPajak, ["jns_identitas"]: newValue });
                     setDisableNoIdentitas(true);
                   } else {
                     setDisableNoIdentitas(false);
@@ -371,7 +376,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
             </Box>
 
             <Box display="flex" gap={2} mt={2}>
-              <TextField required fullWidth label={"Tempat Lahir"} name={"tempatLahir"} type={"text"} value={wajibPajak.tempat_lahir_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["tempat_lahir_wp"]: e.target.value })} />
+              <TextField fullWidth label={"Tempat Lahir"} name={"tempatLahir"} type={"text"} value={wajibPajak.tempat_lahir_wp || ""} onChange={(e) => setWajibPajak({ ...wajibPajak, ["tempat_lahir_wp"]: e.target.value })} />
 
               {/* <DateInput label="Tanggal Lahir" name="tanggalLahir" value={wajibPajak.tanggal_lahir_wp || ""} onChange={ (e) =>
                 setWajibPajak({ ...wajibPajak, ["tanggal_lahir_wp"]: e.target.value})

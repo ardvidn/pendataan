@@ -37,14 +37,14 @@ const SearchNOP = () => {
     }
 
     try {
-      const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/checkdatoppajak/${rawNop}?pel=${12}`);
+      const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/checkdatoppajak/${rawNop}?pel=${13}`);
       const { code, data, message } = response.data;
 
       if (code === 280 && data === null) {
-        toast.success(message || "NOP belum terdaftar, lanjut update!");
-        router.push(`/pendataan/op_update/${rawNop}`);
+        toast.success(message || "NOP belum terdaftar, lanjut hapus!");
+        router.push(`/pendataan/op_hapus/${rawNop}`);
       } else if (code === 290 && data) {
-        toast.error(message || "NOP sudah terdaftar sebagai OP Update!");
+        toast.error(message || "NOP sudah terdaftar sebagai OP Hapus!");
       } else {
         toast.error("Respons server tidak dikenali.");
       }
@@ -60,7 +60,7 @@ const SearchNOP = () => {
   };
 
   const handleBack = () => {
-    router.push("/pendataan/op_update");
+    router.push("/pendataan/op_hapus");
   };
 
   return (

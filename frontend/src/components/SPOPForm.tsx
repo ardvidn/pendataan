@@ -18,9 +18,10 @@ interface SpopFormProps {
   wajibPajak: any;
   setWajibPajak: React.Dispatch<React.SetStateAction<any>>;
   onValidityChange: (isValid: boolean) => void;
+  onValidityChangeB: (isValid: boolean) => void;
 }
 
-export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, setWajibPajak, onValidityChange }: SpopFormProps) => {
+export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, setWajibPajak, onValidityChange, onValidityChangeB }: SpopFormProps) => {
   const [showLahanKeterangan, setShowLahanKeterangan] = useState(false);
   const [provinsiOptions, setProvinsiOptions] = useState<string[]>([]);
 
@@ -261,7 +262,7 @@ export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, se
           showLahanKeterangan={showLahanKeterangan}
           handleDateChange={handleDateChange}
           handleAutocompleteChange={handleAutocompleteChange}
-          onValidityChange={onValidityChange}
+          onValidityChangeB={onValidityChangeB}
         />
 
         <DataWPdanFoto

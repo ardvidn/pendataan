@@ -1,3 +1,20 @@
+// import { Box } from "@mui/material";
+// import React from "react";
+// import { Toaster } from "react-hot-toast";
+
+// const OpHapus = () => {
+//   return (
+//     <>
+//       <Toaster position="top-center" />
+//       <Box width={"fullwidth"} height={"100%"} sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
+//         <Box display={"flex"} justifyContent="center" alignItems="center"></Box>
+//       </Box>
+//     </>
+//   );
+// };
+
+// export default OpHapus;
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Box, Button, Divider, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField, Typography } from "@mui/material";
@@ -30,7 +47,7 @@ interface dataProps {
   tgl_pelayanan: string;
 }
 
-const OpUpdate = () => {
+const OpHapus = () => {
   const [data, setData] = useState<dataProps[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
@@ -47,7 +64,7 @@ const OpUpdate = () => {
   const fetchData = useCallback(
     async (page = 1, limit = itemsPerPage) => {
       try {
-        const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdate?page=${page}&limit=${limit}&pel=${12}`);
+        const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdate?page=${page}&limit=${limit}&pel=${13}`);
         setData(response.data.data);
         setTotalItems(response.data.total);
         setTotalPages(response.data.totalPages);
@@ -67,7 +84,7 @@ const OpUpdate = () => {
 
   const fetchSearchData = async (page = 1, limit = itemsPerPage) => {
     try {
-      const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdatebysearch?nop=${rawNop}&page=${page}&limit=${limit}&pel=${12}`);
+      const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdatebysearch?nop=${rawNop}&page=${page}&limit=${limit}&pel=${13}`);
       setData(response.data.data);
       setTotalItems(response.data.total);
       setTotalPages(response.data.totalPages);
@@ -135,11 +152,11 @@ const OpUpdate = () => {
   };
 
   const handleGoToSearch = () => {
-    router.push("/pendataan/op_update/search_nop");
+    router.push("/pendataan/op_hapus/search_nop");
   };
 
   const handleEditButton = (nop: string) => {
-    router.push(`/pendataan/op_update/${nop}?source=edit`);
+    router.push(`/pendataan/op_hapus/${nop}?source=edit`);
   };
 
   const handleDeleteButton = async (nop: string) => {
@@ -239,7 +256,7 @@ const OpUpdate = () => {
             startIcon={<AddIcon />}
             onClick={handleGoToSearch}
           >
-            Update
+            Hapus
           </Button>
         </Box>
         <Box display="flex" flexDirection={"column"} justifyContent="center" alignItems="center">
@@ -372,4 +389,4 @@ const OpUpdate = () => {
   );
 };
 
-export default OpUpdate;
+export default OpHapus;

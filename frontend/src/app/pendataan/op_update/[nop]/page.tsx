@@ -26,6 +26,7 @@ export default function UpdateNOPForm() {
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [isSpopValid, setIsSpopValid] = useState(false);
+  const [isSpopValidB, setIsSpopValidB] = useState(false);
   const [isLspopValid, setIsLspopValid] = useState(false);
   const [isGeoValid, setIsGeoValid] = useState(false);
   const router = useRouter();
@@ -95,7 +96,7 @@ export default function UpdateNOPForm() {
   }, [router]);
 
   const isCurrentStepValid = () => {
-    if (activeStep === 0) return isSpopValid;
+    if (activeStep === 0) return isSpopValid && isSpopValidB;
     if (activeStep === 1 && !isTanahKosong) return isLspopValid;
     if (activeStep === 2 || (activeStep === 1 && isTanahKosong)) return isGeoValid;
     return true;
@@ -190,7 +191,9 @@ export default function UpdateNOPForm() {
             </Button>
           </Box>
 
-          {activeStep === 0 && <SPOPForm nop={paramsNOP.nop} spopData={spopData} setSpopData={setSpopData} isLoading={isLoading} wajibPajak={wajibPajak} setWajibPajak={setWajibPajak} onValidityChange={setIsSpopValid} />}
+          {activeStep === 0 && (
+            <SPOPForm nop={paramsNOP.nop} spopData={spopData} setSpopData={setSpopData} isLoading={isLoading} wajibPajak={wajibPajak} setWajibPajak={setWajibPajak} onValidityChange={setIsSpopValid} onValidityChangeB={setIsSpopValidB} />
+          )}
 
           {activeStep === 1 && !isTanahKosong && <LSPOPForm nop={paramsNOP.nop} lspopData={lspopData} setLspopData={setLspopData} onValidityChange={setIsLspopValid} />}
 
