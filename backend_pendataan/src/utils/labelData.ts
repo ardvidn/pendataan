@@ -48,6 +48,12 @@ export const lantaiBangunanOptions = { "1": "MARMER", "2": "KERAMIK", "3": "TERA
 
 export const langitLangitBangunanOptions = { "1": "AKUSTIK / JATI", "2": "TRIPLEK / ASBES BAMBU", "3": "TIDAK ADA" };
 
+export const kodeJenisPelayanan: Record<"11" | "12" | "13", string> = {
+  "11": "OP Baru",
+  "12": "OP Update",
+  "13": "OP Hapus",
+};
+
 export function getKeyByContainsValue<T extends Record<string | number, string>>(object: T, searchValue: string): keyof T | undefined {
   const normalizedSearch = String(searchValue)?.toLowerCase().trim();
 

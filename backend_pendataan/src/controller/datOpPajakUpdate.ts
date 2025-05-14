@@ -16,6 +16,7 @@ import {
   jns_asaltanahOptions,
   jns_peruntukanOptions,
   jns_wpOptions,
+  kodeJenisPelayanan,
   kodeJpb,
   kondisiBangunanOptions,
   konstruksiBangunanOptions,
@@ -84,7 +85,7 @@ export const inputDatOpPajakUpdate = async (req: Request, res: Response) => {
       },
       uuid: existingOpPajak?.uuid || uuidUtama,
       jns_peruntukan: getKeyByContainsValue(jns_peruntukanOptions, req.body.dat_op_pajak.jns_peruntukan),
-      jns_asaltanah: getKeyByContainsValue(jns_asaltanahOptions, req.body.dat_op_pajak.jns_asaltanah),
+      // jns_asaltanah: getKeyByContainsValue(jns_asaltanahOptions, req.body.dat_op_pajak.jns_asaltanah),
       rw_op: req.body.dat_op_pajak.rw_op.trim(),
       // kd_status_wp: getKeyByContainsValue(jns_wpOptions, req.body.dat_op_pajak.kd_status_wp.kode),
       kd_prov_baru: "",
@@ -220,17 +221,25 @@ export const getDatOpPajakUpdate = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 5;
     const skip = (page - 1) * limit;
+    const pelayanan = String(req.query.pel);
 
     const [data, total] = await Promise.all([
       datOpPajakRepository.find({
+        where: {
+          kd_jns_pelayanan: pelayanan,
+        },
         skip,
         take: limit,
         order: { tgl_pelayanan: "DESC" }, // Optional: add sorting
       }),
-      datOpPajakRepository.count(),
+      datOpPajakRepository.count({
+        where: {
+          kd_jns_pelayanan: pelayanan,
+        },
+      }),
     ]);
 
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.max(1, Math.ceil(total / limit));
 
     return res.status(200).json({
       code: 200,
@@ -264,6 +273,13 @@ export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
         kd_jns_op: nop.slice(17, 18),
       },
     });
+
+    if (datOpPajak === null) {
+      return res.status(404).json({
+        code: 404,
+        message: `${nop} belum terdaftar`,
+      });
+    }
 
     const datOpBangunan = await datOpBangunanRepository.find({
       where: {
@@ -318,19 +334,19 @@ export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
         nop: datOpPajak?.nop,
         nop_join: datOpPajak?.nop_join,
         jalan_op: datOpPajak?.jalan_op,
-        total_luas_bumi: datOpPajak?.total_luas_bumi || 0,
-        total_luas_bng: datOpPajak?.total_luas_bng || 0,
+        total_luas_bumi: datOpPajak?.total_luas_bumi,
+        total_luas_bng: datOpPajak?.total_luas_bng,
         blok_kav_no_op: datOpPajak?.blok_kav_no_op,
         rw_op: datOpPajak?.rw_op,
         rt_op: datOpPajak?.rt_op,
         kd_status_wp: datOpPajak?.kd_status_wp,
         kd_znt: datOpPajak?.kd_znt,
         jns_bumi: datOpPajak?.jns_bumi,
-        jns_transaksi_op: datOpPajak?.jns_transaksi_op || "2",
+        jns_transaksi_op: datOpPajak?.jns_transaksi_op,
         no_sertifikat: datOpPajak?.no_sertifikat,
         tgl_sertifikat: datOpPajak?.tgl_sertifikat,
         nop_asal: datOpPajak?.nop_asal.trim(),
-        kd_status_cabang: datOpPajak?.kd_status_cabang,
+        kd_status_cabang: datOpPajak?.kd_status_cabang === false ? "Bukan Cabang" : "Cabang",
         no_persil: datOpPajak?.no_persil,
         longitude: datOpPajak?.longitude,
         latitude: datOpPajak?.latitude,
@@ -449,6 +465,7 @@ export const getDatOpPajakUpdateBySearch = async (req: Request, res: Response) =
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 5;
     const skip = (page - 1) * limit;
+    const pelayanan = String(req.query.pel);
 
     // Validate nop is a string
     if (!nop || typeof nop !== "string") {
@@ -471,6 +488,7 @@ export const getDatOpPajakUpdateBySearch = async (req: Request, res: Response) =
           kd_blok: nop.slice(10, 13),
           no_urut: nop.slice(13, 17),
           kd_jns_op: nop.slice(17, 18),
+          kd_jns_pelayanan: pelayanan,
         },
         skip,
         take: limit,
@@ -484,11 +502,38 @@ export const getDatOpPajakUpdateBySearch = async (req: Request, res: Response) =
           kd_blok: nop.slice(10, 13),
           no_urut: nop.slice(13, 17),
           kd_jns_op: nop.slice(17, 18),
+          kd_jns_pelayanan: pelayanan,
         },
       }),
     ]);
 
+    const dataKodeJenisPelayanan = await datOpPajakRepository.find({
+      where: {
+        kd_prov: nop.slice(0, 2),
+        kd_kab: nop.slice(2, 4),
+        kd_kec: nop.slice(4, 7),
+        kd_kel: nop.slice(7, 10),
+        kd_blok: nop.slice(10, 13),
+        no_urut: nop.slice(13, 17),
+        kd_jns_op: nop.slice(17, 18),
+      },
+    });
+
     const totalPages = Math.ceil(total / limit);
+
+    if (dataKodeJenisPelayanan.length === 0) {
+      return res.status(404).json({
+        code: 404,
+        message: `${nop} belum terdaftar sebagai ${kodeJenisPelayanan[pelayanan as keyof typeof kodeJenisPelayanan]}`,
+      });
+    }
+
+    if (dataKodeJenisPelayanan[0].kd_jns_pelayanan !== pelayanan) {
+      return res.status(404).json({
+        code: 404,
+        message: `NOP sudah terdaftar sebagai ${kodeJenisPelayanan[dataKodeJenisPelayanan[0].kd_jns_pelayanan as keyof typeof kodeJenisPelayanan]}`,
+      });
+    }
 
     return res.status(200).json({
       code: 200,
@@ -562,6 +607,7 @@ export const deleteOpPajak = async (req: Request, res: Response) => {
 export const checkDatOpPajakExist = async (req: Request, res: Response) => {
   try {
     const { nop } = req.params;
+    const pelayanan = String(req.query.pel);
 
     const checkData = await datOpPajakRepository.findOne({ where: { nop } });
 
@@ -569,7 +615,13 @@ export const checkDatOpPajakExist = async (req: Request, res: Response) => {
       return res.status(200).json({
         code: 280,
         data: checkData,
-        message: "NOP belum terdaftar sebagai OP Update",
+        message: `NOP belum terdaftar sebagai ${kodeJenisPelayanan[pelayanan as keyof typeof kodeJenisPelayanan]}`,
+      });
+    }
+    if (checkData && checkData?.kd_jns_pelayanan !== pelayanan) {
+      return res.status(404).json({
+        code: 404,
+        message: `NOP sudah terdaftar sebagai ${kodeJenisPelayanan[checkData?.kd_jns_pelayanan as keyof typeof kodeJenisPelayanan]}`,
       });
     }
 
