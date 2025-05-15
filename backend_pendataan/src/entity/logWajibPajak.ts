@@ -30,8 +30,8 @@ export class LogWajibPajak {
   @Column({ type: "varchar", length: 50, nullable: true })
   tempat_lahir_wp!: string;
 
-  @Column({ type: "date", nullable: true })
-  tanggal_lahir_wp!: Date;
+  @Column({ type: "text", nullable: true })
+  tanggal_lahir_wp!: string;
 
   @Column({ type: "text" })
   alamat_wp!: string;
