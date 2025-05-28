@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-resource";
-import { DatObjekPajak } from "@/entity/DatObjekPajak";
+import { DatObjekPajak } from "../entity/DatObjekPajak";
 
 const datObjekPajakRepository = AppDataSource.getRepository(DatObjekPajak);
 

@@ -1,4 +1,4 @@
-import { getUrutOpBaru } from "@/controller/getUrutOpBaru";
+import { getUrutOpBaru } from "../controller/getUrutOpBaru";
 import { getAllDatObjekPajak } from "../controller/getDatObjekPajak";
 import { getKodeBlok, getKodeKecamatan, getKodeKelurahan } from "../controller/getKodeWilayah";
 import { getKodeZnt } from "../controller/getKodeZnt";
