@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { formatNoSertifikat, isNoSertifikatValid } from "../../utils/FormatForm";
-import { jenisAsalTanahOptions, jenisBumiOptions, jenisPeruntukanOptions, statusWpOptions } from "../../utils/labelData";
+import { jenisAsalTanahOptions, jenisBumiOptions, jenisPajak, jenisPeruntukanOptions, statusWpOptions } from "../../utils/labelData";
 import { createOptionsFromArray, getKodeFromLabel, getLabelFromKode } from "../../utils/optionsHelper";
-import { Autocomplete, Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Checkbox, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
 import React, { useEffect } from "react";
-// import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-// import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
-// const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-// const checkedIcon = <CheckBoxIcon fontSize="small" />;
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 interface LetakOPdanDataBumiProps {
   spopData: any;
@@ -40,26 +40,32 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
           Data Letak Objek Pajak
         </Typography>
         <Divider />
-        {/* <Autocomplete
-                      multiple
-                      id="checkboxes-tags-demo"
-                      options={jenisPajak}
-                      disableCloseOnSelect
-                      getOptionLabel={(option) => option.jenispajak}
-                      onChange={(e, newValue) => setTestData({ ...testData, ["jenis_pajak"]: newValue || "" })}
-                      renderOption={(props, option, { selected }) => {
-                        const { key, ...optionProps } = props;
-                        return (
-                          <li key={key} {...optionProps}>
-                            <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
-                            {option.jenispajak}
-                          </li>
-                        );
-                      }}
-                      style={{ width: 500 }}
-                      renderInput={(params) => <TextField {...params} label="Checkboxes" placeholder="Favorites" />}
-                    /> */}
-
+        <Box mt={2}>
+          <Autocomplete
+            fullWidth
+            multiple
+            id="checkboxes-tags-demo"
+            options={jenisPajak}
+            disableCloseOnSelect
+            getOptionLabel={(option) => option.jenispajak}
+            value={spopData.jenis_pajak?.map((item: any) => ({ jenispajak: item })) || []}
+            onChange={(e, newValue) => {
+              const selectedValues = newValue.map((item) => item.jenispajak); // Ambil value string-nya saja
+              setSpopData({ ...spopData, jenis_pajak: selectedValues });
+            }}
+            renderOption={(props, option, { selected }) => {
+              const { key, ...optionProps } = props;
+              return (
+                <li key={key} {...optionProps}>
+                  <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
+                  {option.jenispajak}
+                </li>
+              );
+            }}
+            style={{ width: 500 }}
+            renderInput={(params) => <TextField {...params} label="Jenis Pajak" placeholder="Jenis Pajak..." />}
+          />
+        </Box>
         <Box mt={2}>
           {/* <DateInput label="Tanggal Sertifikat" name="tanggalSertifikat" value={spopData.tgl_sertifikat || ""} onChange={handleDateChange} /> */}
           <LocalizationProvider dateAdapter={AdapterDayjs}>

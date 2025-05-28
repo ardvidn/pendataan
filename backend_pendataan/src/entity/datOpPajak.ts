@@ -190,4 +190,7 @@ export class DatOpPajak {
 
   @Column({ type: "char", length: 100, nullable: true })
   dusun_op!: string;
+
+  @Column({ type: "text", array: true, nullable: true })
+  jenis_pajak!: string[];
 }

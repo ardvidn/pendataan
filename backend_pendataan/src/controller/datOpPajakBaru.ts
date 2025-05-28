@@ -387,6 +387,7 @@ export const getDatOpPajakBaruByNOP = async (req: Request, res: Response) => {
         nop_baru: datOpPajak?.nop_baru,
         dusun_op: datOpPajak?.dusun_op,
         no_identitas: datOpPajak?.no_identitas,
+        jenis_pajak: datOpPajak.jenis_pajak,
       },
       wajib_pajak: {
         jns_wp: datWajibPajak?.jns_wp,
