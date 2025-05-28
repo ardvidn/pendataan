@@ -1,22 +1,20 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import GeoInputWithMap from "../../../../components/LocationForm";
-import { LSPOPForm } from "../../../../components/LSPOP/LSPOPForm";
-import { Box, Step, StepLabel, Stepper, Button, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams, useSearchParams } from "next/navigation";
-import { preparePayload } from "../../../../utils/FormPayload";
+import { Box, Button, Step, StepLabel, Stepper, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { logged, ResponseData } from "../../../../utils/interface";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { SPOPForm } from "../../../../components/SPOP/SPOPForm";
+import { useRouter, useSearchParams } from "next/navigation";
+import { logged } from "@/utils/interface";
+import axios from "axios";
+import SPOPFormBaru from "@/components/FormOPBaru/SPOPBaru/SPOPFormBaru";
+import { LSPOPForm } from "@/components/LSPOP/LSPOPForm";
+import GeoInputWithMap from "@/components/LocationForm";
+import { preparePayload } from "@/utils/FormPayload";
 
 const steps = ["SPOP", "LSPOP", "Lokasi"];
 
-export default function UpdateNOPForm() {
+const FormOpBaru = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [spopData, setSpopData] = useState<Record<any, any>>({});
   const [wajibPajak, setWajibPajak] = useState<Record<string, any>>({});
@@ -29,62 +27,65 @@ export default function UpdateNOPForm() {
   const [isSpopValidB, setIsSpopValidB] = useState(false);
   const [isLspopValid, setIsLspopValid] = useState(false);
   const [isGeoValid, setIsGeoValid] = useState(false);
+  const [kdKecBaru, setKdKecBaru] = useState("");
+  const [kdKelBaru, setKdKelBaru] = useState("");
+  const [kdBlokBaru, setKdBlokBaru] = useState("");
+  const [nopBaru, setNopBaru] = useState("");
+  const [selectedKecamatanBaru, setSelectedKecamatanBaru] = useState<any | null>(null);
+  const [selectedKelurahanBaru, setSelectedKelurahanBaru] = useState<any | null>(null);
+  const [selectedBlokBaru, setSelectedBlokBaru] = useState<any | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const paramsNOP = useParams<{ nop: string }>();
   const isTanahKosong = spopData?.jns_bumi === "3";
   const isFromEdit = searchParams.get("source") === "edit";
 
   useEffect(() => {
-    const fetchDatOpPajakUpdateNOP = async () => {
+    const fetchDataBaru = async () => {
       try {
-        // Selalu ambil data dari pendataan jika dari edit button
-        if (isFromEdit) {
-          const response = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdatebynop?nop=${paramsNOP.nop}`);
-          const data = response.data.data;
-          setSpopData(data.dat_op_pajak);
-          setLspopData(data.dat_op_bangunan);
-          setWajibPajak(data.wajib_pajak);
-          setLatitude(data.dat_op_pajak.latitude);
-          setLongitude(data.dat_op_pajak.longitude);
-          return;
-        }
-        // Hanya ambil data PBB jika bukan dari edit button
-        else {
-          const response = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/datobjekpajak?nop=${paramsNOP.nop}`);
-          const data = response.data.data;
-          setSpopData(data.dat_op_pajak);
-          setLspopData(data.dat_op_bangunan);
-          setWajibPajak(data.wajib_pajak);
-          setLatitude(data.dat_op_pajak.latitude);
-          setLongitude(data.dat_op_pajak.longitude);
-        }
+        const kd_kecamatan = kdKecBaru || "";
+        const kd_kelurahan = kdKelBaru || "";
+        const kd_blok = kdBlokBaru || "";
 
-        // Fallback jika foto_op kosong
-        if (!spopData.foto_op || spopData.dat_op_pajak.foto_op.length === 0) {
-          const fotoResponse = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getfotopersil/${paramsNOP.nop}`);
-          const imageUrls = fotoResponse.data.imageUrls;
+        if (!kd_kecamatan || !kd_kelurahan || !kd_blok) return;
 
-          if (fotoResponse.data.isEmpty === true) {
-            return;
+        const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/checkdatoppajakbaru?kd_kec=${kd_kecamatan}&kd_kel=${kd_kelurahan}&kd_blok=${kd_blok}&pel=11`);
+
+        if (response.data.code === 290 || response.data.code === 280) {
+          let noUrutBaru: string;
+
+          if (response.data.code === 290) {
+            noUrutBaru = String(parseInt(response.data.data) + 1).padStart(4, "0");
+          } else {
+            const urutResp = await axios.get<any>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/urutopbaru?kd_kecamatan=${kd_kecamatan}&kd_kelurahan=${kd_kelurahan}&kd_blok=${kd_blok}`);
+            noUrutBaru = String(parseInt(urutResp.data.data) + 1).padStart(4, "0");
           }
-          // Inject ke spopData
-          setSpopData((prev) => ({
-            ...prev,
-            foto_op: imageUrls,
-          }));
+
+          const NOPBaru = `6213${kd_kecamatan}${kd_kelurahan}${kd_blok}${noUrutBaru}0`;
+          setNopBaru(NOPBaru);
+
+          if (!spopData?.nop) {
+            setSpopData((prev) => ({ ...prev, nop: NOPBaru }));
+          }
         }
-      } catch (error) {
-        console.error("Error mengambil data:", error);
+      } catch (err) {
+        console.error("Error generating new NOP:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    setIsLoading(false);
-    fetchDatOpPajakUpdateNOP();
-  }, [paramsNOP.nop, isFromEdit]);
+    if (!isFromEdit) {
+      fetchDataBaru();
+    }
+  }, [isFromEdit, kdBlokBaru, kdKecBaru, kdKelBaru, spopData?.nop]);
+
+  const isCurrentStepValid = () => {
+    if (activeStep === 0) return isSpopValid && isSpopValidB;
+    if (activeStep === 1 && !isTanahKosong) return isLspopValid;
+    if (activeStep === 2 || (activeStep === 1 && isTanahKosong)) return isGeoValid;
+    return true;
+  };
 
   useEffect(() => {
     axios
@@ -94,13 +95,6 @@ export default function UpdateNOPForm() {
       })
       .catch(() => router.push("/login"));
   }, [router]);
-
-  const isCurrentStepValid = () => {
-    if (activeStep === 0) return isSpopValid && isSpopValidB;
-    if (activeStep === 1 && !isTanahKosong) return isLspopValid;
-    if (activeStep === 2 || (activeStep === 1 && isTanahKosong)) return isGeoValid;
-    return true;
-  };
 
   const handleNext = async () => {
     if (!isCurrentStepValid()) {
@@ -114,20 +108,21 @@ export default function UpdateNOPForm() {
       const updatedSpopData = {
         ...spopData,
         user_pelayanan: username, //
-        kd_jns_pelayanan: "12",
-        kd_pelayanan: "2",
+        kd_jns_pelayanan: "11",
+        kd_pelayanan: "1",
         log_by: username,
+        jns_transaksi_op: "1",
       };
-      const payload = preparePayload(updatedSpopData, lspopData, wajibPajak, latitude, longitude, paramsNOP.nop);
+      const payload = preparePayload(updatedSpopData, lspopData, wajibPajak, latitude, longitude, nopBaru);
 
       try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopupdate?nop=${paramsNOP.nop}`, payload);
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopbaru?nop=${nopBaru}`, payload);
         if (response.status === 200) {
-          toast.success(`Berhasil mengunggah op update`);
+          toast.success(`Berhasil mengunggah op baru`);
 
-          router.push(`/pendataan/op_update`);
+          router.push(`/pendataan/op_baru`);
         } else {
-          toast.error(`Terjadi kesalahan saat mengunggah op update`);
+          toast.error(`Terjadi kesalahan saat mengunggah op baru`);
         }
       } catch (error) {
         console.log(error);
@@ -153,10 +148,8 @@ export default function UpdateNOPForm() {
   };
 
   const handleGoToBack = () => {
-    router.push("/pendataan/op_update");
+    router.push("/pendataan/op_baru");
   };
-
-  if (isLoading) return <Typography>Loading...</Typography>;
 
   return (
     <>
@@ -173,7 +166,6 @@ export default function UpdateNOPForm() {
               );
             })}
           </Stepper>
-
           <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
             <Button
               variant="contained"
@@ -190,12 +182,34 @@ export default function UpdateNOPForm() {
               Kembali
             </Button>
           </Box>
-
           {activeStep === 0 && (
-            <SPOPForm nop={paramsNOP.nop} spopData={spopData} setSpopData={setSpopData} isLoading={isLoading} wajibPajak={wajibPajak} setWajibPajak={setWajibPajak} onValidityChange={setIsSpopValid} onValidityChangeB={setIsSpopValidB} />
+            <Box sx={{ color: "#000" }}>
+              <SPOPFormBaru
+                spopData={spopData}
+                setSpopData={setSpopData}
+                nopBaru={nopBaru}
+                kdKecBaru={kdKecBaru}
+                kdKellBaru={kdKelBaru}
+                kdBlokBaru={kdBlokBaru}
+                setKdKecBaru={setKdKecBaru}
+                setKdKelBaru={setKdKelBaru}
+                setKdBlokBaru={setKdBlokBaru}
+                onValidityChange={setIsSpopValid}
+                onValidityChangeB={setIsSpopValidB}
+                wajibPajak={wajibPajak}
+                setWajibPajak={setWajibPajak}
+                isLoading={isLoading}
+                selectedKecamatanBaru={selectedKecamatanBaru}
+                setSelectedKecamatanBaru={setSelectedKecamatanBaru}
+                selectedKelurahanBaru={selectedKelurahanBaru}
+                setSelectedKelurahanBaru={setSelectedKelurahanBaru}
+                selectedBlokBaru={selectedBlokBaru}
+                setSelectedBlokBaru={setSelectedBlokBaru}
+              />
+            </Box>
           )}
 
-          {activeStep === 1 && !isTanahKosong && <LSPOPForm nop={paramsNOP.nop} lspopData={lspopData} setLspopData={setLspopData} onValidityChange={setIsLspopValid} />}
+          {activeStep === 1 && !isTanahKosong && <LSPOPForm nop={nopBaru} lspopData={lspopData} setLspopData={setLspopData} onValidityChange={setIsLspopValid} />}
 
           {(activeStep === 2 || (activeStep === 1 && isTanahKosong)) && (
             <GeoInputWithMap latitude={latitude} longitude={longitude} setLatitude={setLatitude} setLongitude={setLongitude} spopData={spopData} setSpopData={setSpopData} onValidityChange={setIsGeoValid} />
@@ -220,4 +234,6 @@ export default function UpdateNOPForm() {
       </Box>
     </>
   );
-}
+};
+
+export default FormOpBaru;

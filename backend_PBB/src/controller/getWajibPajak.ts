@@ -21,8 +21,9 @@ export const getWajibPajak = async (req: Request, res: Response) => {
     }));
 
     if (filtered.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         code: 404,
+        data: filtered,
         message: "Nomor identitas tidak ditemukan",
       });
     }

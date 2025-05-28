@@ -40,7 +40,7 @@ const kodeKabupatenRepository = AppDataSource.getRepository(kodeKabupaten);
 const kodeKecamatanRepository = AppDataSource.getRepository(kodeKecamatan);
 const kodeKelurahanRepository = AppDataSource.getRepository(kodeKelurahan);
 
-export const inputDatOpPajakUpdate = async (req: Request, res: Response) => {
+export const inputDatOpPajakBaru = async (req: Request, res: Response) => {
   const queryRunner = AppDataSource.createQueryRunner();
   await queryRunner.connect();
   await queryRunner.startTransaction();
@@ -84,7 +84,9 @@ export const inputDatOpPajakUpdate = async (req: Request, res: Response) => {
       uuid: existingOpPajak?.uuid || uuidUtama,
       jns_peruntukan: getKeyByContainsValue(jns_peruntukanOptions, req.body.dat_op_pajak.jns_peruntukan),
       // jns_asaltanah: getKeyByContainsValue(jns_asaltanahOptions, req.body.dat_op_pajak.jns_asaltanah),
-      rw_op: req.body.dat_op_pajak.rw_op.trim(),
+      rw_op: req.body.dat_op_pajak.rw_op,
+      no_identitas: req.body.wajib_pajak.no_identitas,
+      total_luas_bng: req.body.dat_op_pajak.total_luas_bng || 0,
       // kd_status_wp: getKeyByContainsValue(jns_wpOptions, req.body.dat_op_pajak.kd_status_wp.kode),
       kd_prov_baru: "",
       kd_kab_baru: "",
@@ -118,11 +120,10 @@ export const inputDatOpPajakUpdate = async (req: Request, res: Response) => {
       const requestDataWajibPajak = {
         ...req.body.wajib_pajak,
         nop,
-        kd_provinsi: req.body.wajib_pajak.kd_provinsi.split("-")[0],
-        kd_kabupaten: req.body.wajib_pajak.kd_kabupaten.split("-")[0],
-        kd_kecamatan: req.body.wajib_pajak.kd_kecamatan.split("-")[0],
-        kd_kelurahan: req.body.wajib_pajak.kd_kelurahan.split("-")[0],
-        no_identitas: req.body.dat_op_pajak.no_identitas,
+        kd_provinsi: req.body.wajib_pajak.kd_provinsi.split("-")[0].trim(),
+        kd_kabupaten: req.body.wajib_pajak.kd_kabupaten.split("-")[0].trim(),
+        kd_kecamatan: req.body.wajib_pajak.kd_kecamatan.split("-")[0].trim(),
+        kd_kelurahan: req.body.wajib_pajak.kd_kelurahan.split("-")[0].trim(),
         log_by: existingOpPajak?.log_by || req.body.dat_op_pajak.log_by,
         log_at: wajibPajakOperation === "INSERT" ? tanggal : existingWajibPajak?.log_at,
       };
@@ -214,46 +215,40 @@ export const inputDatOpPajakUpdate = async (req: Request, res: Response) => {
   }
 };
 
-export const getDatOpPajakUpdate = async (req: Request, res: Response) => {
+export const checkDatOpPajakBaru = async (req: Request, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 5;
-    const skip = (page - 1) * limit;
     const pelayanan = String(req.query.pel);
+    const { kd_kec, kd_kel, kd_blok } = req.query;
 
-    const [data, total] = await Promise.all([
-      datOpPajakRepository.find({
-        where: {
-          kd_jns_pelayanan: pelayanan,
-        },
-        skip,
-        take: limit,
-        order: { tgl_pelayanan: "DESC" }, // Optional: add sorting
-      }),
-      datOpPajakRepository.count({
-        where: {
-          kd_jns_pelayanan: pelayanan,
-        },
-      }),
-    ]);
+    const checkData = await datOpPajakRepository
+      .createQueryBuilder("op")
+      .select("MAX(CAST(op.no_urut AS INTEGER))", "max")
+      .where("op.kd_kec = :kd_kec", { kd_kec })
+      .andWhere("op.kd_kel = :kd_kel", { kd_kel })
+      .andWhere("op.kd_blok = :kd_blok", { kd_blok })
+      .andWhere("op.kd_jns_pelayanan = :pelayanan", { pelayanan })
+      .getRawOne();
 
-    const totalPages = Math.max(1, Math.ceil(total / limit));
+    if (checkData.max === null) {
+      return res.status(200).json({
+        code: 280,
+        data: checkData.max,
+        message: `Nomor urut dari ${kd_kec}.${kd_kel}.${kd_blok} belum terdaftar sebagai ${kodeJenisPelayanan[pelayanan as keyof typeof kodeJenisPelayanan]}`,
+      });
+    }
 
     return res.status(200).json({
-      code: 200,
-      data,
-      total,
-      totalPages,
-      currentPage: page,
-      message: "Berhasil mengambil data",
+      code: 290,
+      data: checkData.max,
+      message: `berhasil mengambil nomor urut terakhir dari ${kd_kec}.${kd_kel}.${kd_blok}`,
     });
   } catch (error) {
-    console.error("Error saat mengambil data objek pajak:", error);
+    console.error("Gagal mengecek data:", error);
     return res.status(500).json({ code: 500, message: "Internal server error" });
   }
 };
 
-export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
+export const getDatOpPajakBaruByNOP = async (req: Request, res: Response) => {
   try {
     const { nop } = req.query;
     if (!nop || typeof nop !== "string") {
@@ -314,7 +309,7 @@ export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
       where: {
         KD_PROV: datWajibPajak?.kd_provinsi,
         KD_KAB: datWajibPajak?.kd_kabupaten,
-        KD_KEC: datWajibPajak?.kd_kecamatan.trim() || datWajibPajak?.kd_kecamatan,
+        KD_KEC: datWajibPajak?.kd_kecamatan.trim(),
       },
     });
 
@@ -322,14 +317,21 @@ export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
       where: {
         KD_PROV: datWajibPajak?.kd_provinsi,
         KD_KAB: datWajibPajak?.kd_kabupaten,
-        KD_KEC: datWajibPajak?.kd_kecamatan.trim() || datWajibPajak?.kd_kecamatan,
-        KD_KEL: datWajibPajak?.kd_kelurahan.trim() || datWajibPajak?.kd_kelurahan,
+        KD_KEC: datWajibPajak?.kd_kecamatan.trim(),
+        KD_KEL: datWajibPajak?.kd_kelurahan.trim(),
       },
     });
 
     const data = {
       dat_op_pajak: {
         nop: datOpPajak?.nop,
+        kd_prov: datOpPajak.kd_prov,
+        kd_kab: datOpPajak.kd_kab,
+        kd_kec: datOpPajak.kd_kec,
+        kd_kel: datOpPajak.kd_kel,
+        kd_blok: datOpPajak.kd_blok,
+        no_urut: datOpPajak.no_urut,
+        kd_jns_op: datOpPajak.kd_jns_op,
         nop_join: datOpPajak?.nop_join,
         jalan_op: datOpPajak?.jalan_op,
         total_luas_bumi: datOpPajak?.total_luas_bumi,
@@ -337,13 +339,13 @@ export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
         blok_kav_no_op: datOpPajak?.blok_kav_no_op,
         rw_op: datOpPajak?.rw_op,
         rt_op: datOpPajak?.rt_op,
-        kd_status_wp: datOpPajak?.kd_status_wp,
+        kd_status_wp: datOpPajak?.kd_status_wp.trim(),
         kd_znt: datOpPajak?.kd_znt,
         jns_bumi: datOpPajak?.jns_bumi,
         jns_transaksi_op: datOpPajak?.jns_transaksi_op,
         no_sertifikat: datOpPajak?.no_sertifikat,
         tgl_sertifikat: datOpPajak?.tgl_sertifikat,
-        nop_asal: datOpPajak?.nop_asal.trim() || datOpPajak?.nop_asal,
+        nop_asal: datOpPajak?.nop_asal,
         kd_status_cabang: datOpPajak?.kd_status_cabang === false ? "Bukan Cabang" : "Cabang",
         no_persil: datOpPajak?.no_persil,
         longitude: datOpPajak?.longitude,
@@ -358,7 +360,7 @@ export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
         kd_jns_pelayanan: datOpPajak?.kd_jns_pelayanan,
         kd_pelayanan: datOpPajak?.kd_pelayanan,
         keterangan: datOpPajak?.keterangan,
-        nop_relasi: datOpPajak?.nop_relasi.trim() || datOpPajak?.nop_relasi,
+        nop_relasi: datOpPajak?.nop_relasi,
         hotel: datOpPajak?.hotel,
         restoran: datOpPajak?.restoran,
         hiburan: datOpPajak?.hiburan,
@@ -382,9 +384,9 @@ export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
         kd_blok_baru: datOpPajak?.kd_blok_baru,
         no_urut_baru: datOpPajak?.no_urut_baru,
         kd_jns_op_baru: datOpPajak?.kd_jns_op_baru,
-        nop_baru: datOpPajak?.nop_baru.trim() || datOpPajak?.nop_baru,
-        dusun_op: datOpPajak?.dusun_op.trim() || datOpPajak?.dusun_op,
-        no_identitas: datOpPajak?.no_identitas.trim() || datOpPajak?.no_identitas,
+        nop_baru: datOpPajak?.nop_baru,
+        dusun_op: datOpPajak?.dusun_op,
+        no_identitas: datOpPajak?.no_identitas,
       },
       wajib_pajak: {
         jns_wp: datWajibPajak?.jns_wp,
@@ -453,183 +455,6 @@ export const getDatOpPajakUpdateByNOP = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error saat mengambil data objek pajak:", error);
-    return res.status(500).json({ code: 500, message: "Internal server error" });
-  }
-};
-
-export const getDatOpPajakUpdateBySearch = async (req: Request, res: Response) => {
-  try {
-    const { nop } = req.query;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 5;
-    const skip = (page - 1) * limit;
-    const pelayanan = String(req.query.pel);
-
-    // Validate nop is a string
-    if (!nop || typeof nop !== "string") {
-      return res.status(400).json({ code: 400, message: "Parameter NOP diperlukan dan harus berupa string" });
-    }
-
-    // Validate NOP length (should be 18 characters without dots or 24 with dots)
-    const cleanNop = nop.replace(/\./g, "");
-    if (cleanNop.length !== 18) {
-      return res.status(400).json({ code: 400, message: "Format NOP tidak valid. Harus 18 digit setelah menghilangkan titik" });
-    }
-
-    const [data, total] = await Promise.all([
-      datOpPajakRepository.find({
-        where: {
-          kd_prov: nop.slice(0, 2),
-          kd_kab: nop.slice(2, 4),
-          kd_kec: nop.slice(4, 7),
-          kd_kel: nop.slice(7, 10),
-          kd_blok: nop.slice(10, 13),
-          no_urut: nop.slice(13, 17),
-          kd_jns_op: nop.slice(17, 18),
-          kd_jns_pelayanan: pelayanan,
-        },
-        skip,
-        take: limit,
-      }),
-      datOpPajakRepository.count({
-        where: {
-          kd_prov: nop.slice(0, 2),
-          kd_kab: nop.slice(2, 4),
-          kd_kec: nop.slice(4, 7),
-          kd_kel: nop.slice(7, 10),
-          kd_blok: nop.slice(10, 13),
-          no_urut: nop.slice(13, 17),
-          kd_jns_op: nop.slice(17, 18),
-          kd_jns_pelayanan: pelayanan,
-        },
-      }),
-    ]);
-
-    const dataKodeJenisPelayanan = await datOpPajakRepository.find({
-      where: {
-        kd_prov: nop.slice(0, 2),
-        kd_kab: nop.slice(2, 4),
-        kd_kec: nop.slice(4, 7),
-        kd_kel: nop.slice(7, 10),
-        kd_blok: nop.slice(10, 13),
-        no_urut: nop.slice(13, 17),
-        kd_jns_op: nop.slice(17, 18),
-      },
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    if (dataKodeJenisPelayanan.length === 0) {
-      return res.status(404).json({
-        code: 404,
-        message: `${nop} belum terdaftar sebagai ${kodeJenisPelayanan[pelayanan as keyof typeof kodeJenisPelayanan]}`,
-      });
-    }
-
-    if (dataKodeJenisPelayanan[0].kd_jns_pelayanan !== pelayanan) {
-      return res.status(404).json({
-        code: 404,
-        message: `NOP sudah terdaftar sebagai ${kodeJenisPelayanan[dataKodeJenisPelayanan[0].kd_jns_pelayanan as keyof typeof kodeJenisPelayanan]}`,
-      });
-    }
-
-    return res.status(200).json({
-      code: 200,
-      data,
-      total,
-      totalPages,
-      currentPage: page,
-      message: "Berhasil mengambil data",
-    });
-  } catch (error) {
-    console.error("Error saat mengambil data objek pajak:", error);
-    return res.status(500).json({ code: 500, message: "Internal server error" });
-  }
-};
-
-export const deleteOpPajak = async (req: Request, res: Response) => {
-  const { nop } = req.params;
-
-  try {
-    const opData = await datOpPajakRepository.findOne({ where: { nop } });
-    const bangunanData = await datOpBangunanRepository.find({ where: { nop } });
-    const wpData = await wajibPajakRepository.findOne({ where: { nop } });
-
-    if (!opData) {
-      return res.status(404).json({ code: 404, message: "Data OP tidak ditemukan" });
-    }
-
-    // Simpan log dat_op_pajak
-    await logDatOpPajakRepository.save({
-      ...opData,
-      log_id: uuidv7(),
-      log_operation: "DELETE",
-      log_stamp: new Date(),
-    });
-
-    // Simpan log dat_op_bangunan (jika ada)
-    for (const bangunan of bangunanData) {
-      await logDatOpBangunanRepository.save({
-        ...bangunan,
-        log_id: uuidv7(),
-        log_operation: "DELETE",
-        log_stamp: new Date(),
-      });
-    }
-
-    // Simpan log wajib_pajak (jika ada)
-    if (wpData) {
-      await logWajibPajakRepository.save({
-        ...wpData,
-        log_id: uuidv7(),
-        log_operation: "DELETE",
-        log_stamp: new Date(),
-      });
-    }
-
-    // Hapus data asli
-    await datOpBangunanRepository.delete({ nop }); // hapus banyak
-    await datOpPajakRepository.delete({ nop });
-    if (wpData) await wajibPajakRepository.delete({ nop });
-
-    return res.status(200).json({
-      code: 200,
-      message: `Data dengan NOP ${nop} berhasil dihapus dan dicatat ke log.`,
-    });
-  } catch (error) {
-    console.error("Gagal menghapus data:", error);
-    return res.status(500).json({ code: 500, message: "Internal server error" });
-  }
-};
-
-export const checkDatOpPajakExist = async (req: Request, res: Response) => {
-  try {
-    const { nop } = req.params;
-    const pelayanan = String(req.query.pel);
-
-    const checkData = await datOpPajakRepository.findOne({ where: { nop } });
-
-    if (checkData === null) {
-      return res.status(200).json({
-        code: 280,
-        data: checkData,
-        message: `NOP belum terdaftar sebagai ${kodeJenisPelayanan[pelayanan as keyof typeof kodeJenisPelayanan]}`,
-      });
-    }
-    if (checkData && checkData?.kd_jns_pelayanan !== pelayanan) {
-      return res.status(404).json({
-        code: 404,
-        message: `NOP sudah terdaftar sebagai ${kodeJenisPelayanan[checkData?.kd_jns_pelayanan as keyof typeof kodeJenisPelayanan]}`,
-      });
-    }
-
-    return res.status(200).json({
-      code: 290,
-      data: checkData,
-      message: "NOP sudah terdaftar sebagai OP Update",
-    });
-  } catch (error) {
-    console.error("Gagal mengecek data:", error);
     return res.status(500).json({ code: 500, message: "Internal server error" });
   }
 };

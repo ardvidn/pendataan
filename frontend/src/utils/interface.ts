@@ -27,6 +27,13 @@ export interface Geom {
 
 export interface DatOpPajak {
   nop: string;
+  kd_prov?: string;
+  kd_kab?: string;
+  kd_kec?: string;
+  kd_kel?: string;
+  kd_blok?: string;
+  no_urut?: string;
+  kd_jns_op?: string;
   nop_join: string;
   jalan_op: string;
   total_luas_bumi: number;

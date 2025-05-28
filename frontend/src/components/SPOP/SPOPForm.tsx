@@ -2,13 +2,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Box, TextField, Typography } from "@mui/material";
-import { formatNop } from "../utils/formatNOP";
 import axios from "axios";
-import { formatRibuan } from "../utils/FormatForm";
 import AxiosError from "axios";
-import LetakOPdanDataBumi from "./SPOP/letakOPdanDataBumi";
-import DataWPdanFoto from "./SPOP/DataWPdanFoto";
-import { ApiResponse, Kabupaten, Kecamatan, Kelurahan, Provinsi, WajibPajak, ZNT } from "../utils/interface";
+import { ApiResponse, Kabupaten, Kecamatan, Kelurahan, Provinsi, WajibPajak, ZNT } from "@/utils/interface";
+import { formatRibuan } from "@/utils/FormatForm";
+import LetakOPdanDataBumi from "./letakOPdanDataBumi";
+import DataWPdanFoto from "./DataWPdanFoto";
+import { formatNop } from "@/utils/formatNOP";
 
 interface SpopFormProps {
   nop: string;

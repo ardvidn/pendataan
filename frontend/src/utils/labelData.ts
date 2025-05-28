@@ -62,3 +62,15 @@ export const dindingBangunanOptions = ["1 - KACA / ALUMUNIUM", "2 - BETON", "3 -
 export const lantaiBangunanOptions = ["1 - MARMER", "2 - KERAMIK", "3 - TERASO", "4 - UBIN PC / PAPAN", "5 - SEMEN"];
 
 export const langitLangitBangunanOptions = ["1 - AKUSTIK / JATI", "2 - TRIPLEK / ASBES BAMBU", "3 - TIDAK ADA"];
+
+export const jenisPajak = [
+  { jenispajak: "HOTEL" },
+  { jenispajak: "RESTORAN" },
+  { jenispajak: "HIBURAN" },
+  { jenispajak: "REKLAME" },
+  { jenispajak: "PAJAK PENERANGAN JALAN" },
+  { jenispajak: "MBLB" },
+  { jenispajak: "PARKIR" },
+  { jenispajak: "PAJAK AIR TANAH" },
+  { jenispajak: "WALET" },
+];

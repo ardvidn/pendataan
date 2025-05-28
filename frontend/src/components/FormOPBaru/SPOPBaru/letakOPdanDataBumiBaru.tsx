@@ -1,32 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { formatNoSertifikat, isNoSertifikatValid } from "../../utils/FormatForm";
-import { jenisAsalTanahOptions, jenisBumiOptions, jenisPeruntukanOptions, statusWpOptions } from "../../utils/labelData";
-import { createOptionsFromArray, getKodeFromLabel, getLabelFromKode } from "../../utils/optionsHelper";
+import { formatNoSertifikat, isNoSertifikatValid } from "../../../utils/FormatForm";
+import { jenisAsalTanahOptions, jenisBumiOptions, jenisPeruntukanOptions, statusWpOptions } from "../../../utils/labelData";
+import { createOptionsFromArray, getKodeFromLabel, getLabelFromKode } from "../../../utils/optionsHelper";
 import { Autocomplete, Box, Divider, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
 import React, { useEffect } from "react";
-// import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-// import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
-// const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-// const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
-interface LetakOPdanDataBumiProps {
+interface LetakOPdanDataBumiBaruProps {
   spopData: any;
   setSpopData: React.Dispatch<React.SetStateAction<string[]>>;
-  handleAutocompleteChange: any;
-  handleChange: any;
-  handleDateChange: any;
   handleRadioChange: any;
   zntOptions: string[];
   showLahanKeterangan: boolean;
   onValidityChangeB: (isValid: boolean) => void;
 }
-const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSpopData, zntOptions, showLahanKeterangan, onValidityChangeB }) => {
+const LetakOPdanDataBumiBaru: React.FC<LetakOPdanDataBumiBaruProps> = ({ spopData, setSpopData, zntOptions, showLahanKeterangan, onValidityChangeB }) => {
   useEffect(() => {
     const isValid = spopData.jalan_op && spopData.total_luas_bumi && spopData.kd_znt && spopData.jns_bumi && spopData.jns_peruntukan && spopData.jns_asaltanah && spopData.kd_status_wp; // contoh field
 
@@ -40,25 +32,6 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
           Data Letak Objek Pajak
         </Typography>
         <Divider />
-        {/* <Autocomplete
-                      multiple
-                      id="checkboxes-tags-demo"
-                      options={jenisPajak}
-                      disableCloseOnSelect
-                      getOptionLabel={(option) => option.jenispajak}
-                      onChange={(e, newValue) => setTestData({ ...testData, ["jenis_pajak"]: newValue || "" })}
-                      renderOption={(props, option, { selected }) => {
-                        const { key, ...optionProps } = props;
-                        return (
-                          <li key={key} {...optionProps}>
-                            <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
-                            {option.jenispajak}
-                          </li>
-                        );
-                      }}
-                      style={{ width: 500 }}
-                      renderInput={(params) => <TextField {...params} label="Checkboxes" placeholder="Favorites" />}
-                    /> */}
 
         <Box mt={2}>
           {/* <DateInput label="Tanggal Sertifikat" name="tanggalSertifikat" value={spopData.tgl_sertifikat || ""} onChange={handleDateChange} /> */}
@@ -144,7 +117,7 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
             fullWidth
             options={zntOptions}
             value={spopData.kd_znt || ""}
-            onChange={(e, newValue) => setSpopData({ ...spopData, ["kd_znt"]: newValue })}
+            onChange={(e, newValue) => setSpopData({ ...spopData, ["kd_znt"]: newValue.split(" - ")[0] })}
             renderInput={(params) => <TextField required {...params} label="ZNT" fullWidth />}
           />
         </Box>
@@ -202,4 +175,4 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
   );
 };
 
-export default LetakOPdanDataBumi;
+export default LetakOPdanDataBumiBaru;
