@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { RefKecamatan } from "../entity/RefKecamatan";
 import { RefKelurahan } from "../entity/RefKelurahan";
 import { AppDataSource } from "../data-resource";
-import { DatPetaBlok } from "@/entity/DatPetaBlok";
+import { DatPetaBlok } from "../entity/DatPetaBlok";
 
 export const getKodeKecamatan = async (req: Request, res: Response) => {
   try {
