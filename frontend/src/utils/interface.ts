@@ -218,3 +218,17 @@ export interface WajibPajak {
   id: string;
   name: string;
 }
+
+export interface RoleOptions {
+  id?: number;
+  Role: string;
+  Akses: boolean;
+}
+
+export interface UserOptions {
+  id?: number;
+  username: string;
+  password?: string;
+  role: string;
+  status: boolean;
+}

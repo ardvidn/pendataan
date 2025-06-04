@@ -13,6 +13,7 @@ import Image from "next/image";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import SidebarItem from "./SidebarItem";
 import { useEffect, useState } from "react";
 import { logged } from "../utils/interface";
@@ -80,6 +81,7 @@ export default function Sidebar({ open, setOpen }: { open: boolean; setOpen: Rea
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export default function Sidebar({ open, setOpen }: { open: boolean; setOpen: Rea
       .then((res) => {
         setUsername(res.data.data.username);
         setIsLoggedIn(res.data.loggedIn);
+        setRole(res.data.data.role);
       })
       .catch(() => router.push("/login"));
   }, [router]);
@@ -133,6 +136,7 @@ export default function Sidebar({ open, setOpen }: { open: boolean; setOpen: Rea
           <SidebarItem open useIcon={<CreateNewFolderIcon />} title="OP Baru" link="pendataan/op_baru" />
           <SidebarItem open useIcon={<SystemUpdateAltIcon />} title="OP Update" link="pendataan/op_update" />
           <SidebarItem open useIcon={<DeleteSweepIcon />} title="OP Hapus" link="pendataan/op_hapus" />
+          {role === "admin" && <SidebarItem open useIcon={<SupervisorAccountIcon />} title="Admin" link="pendataan/master/pengguna" />}
         </List>
 
         <Box sx={{ flexGrow: 1 }}></Box>

@@ -13,4 +13,7 @@ export class userAccount {
 
   @Column({ default: "user", nullable: false })
   role!: string;
+
+  @Column({ name: "status", nullable: true })
+  status!: boolean;
 }

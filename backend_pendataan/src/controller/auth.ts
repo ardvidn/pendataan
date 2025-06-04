@@ -16,7 +16,7 @@ export interface jwtPayload {
 // **Register**
 export const register = async (req: Request, res: Response) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password, role, status } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ code: 400, message: "Username dan password wajib diisi!" });
@@ -30,13 +30,13 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await hashPassword(password);
-    const newUser = userRepo.create({ username, password: hashedPassword, role });
+    const newUser = userRepo.create({ username, password: hashedPassword, role, status });
     await userRepo.save(newUser);
 
     return res.status(201).json({
       code: 201,
       message: "Akun berhasil dibuat!",
-      data: { id: newUser.id, username: newUser.username },
+      data: { id: newUser.id, username: newUser.username, role: newUser.role, status: newUser.status },
     });
   } catch (error) {
     console.error("Error mendaftar akun:", error);
@@ -62,6 +62,10 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ code: 401, message: "Username atau password salah!" });
     }
 
+    if (user.status === false) {
+      return res.status(401).json({ code: 401, message: `Hubungi Admin untuk mengaktifkan akun dengan user ${user.username}` });
+    }
+
     const isValidPassword = await comparePassword(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({ code: 401, message: "Username atau password salah!" });
@@ -84,7 +88,7 @@ export const login = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       code: 200,
-      data: token,
+      data: user.role,
       message: "Login berhasil!",
     });
   } catch (error) {
@@ -107,26 +111,27 @@ export const logout = async (req: Request, res: Response) => {
 // **Update Username atau Password**
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    const { userId } = req.body; // Id user harus diberikan
-    const { newUsername, newPassword } = req.body;
+    const { userId } = req.params; // Id user harus diberikan
+    const { username, role, status } = req.body;
 
-    if (!userId || (!newUsername && !newPassword)) {
-      return res.status(400).json({ code: 400, message: "Data tidak valid!" });
+    if (!userId || !username) {
+      return res.status(400).json({ code: 400, data: userId, message: "Data tidak valid!" });
     }
 
     const userRepo = AppDataSource.getRepository(userAccount);
-    const user = await userRepo.findOne({ where: { id: userId } });
+    const user = await userRepo.findOne({ where: { id: Number(userId) } });
 
     if (!user) {
       return res.status(404).json({ code: 404, message: "User tidak ditemukan!" });
     }
 
-    if (newUsername) user.username = newUsername;
-    if (newPassword) user.password = await hashPassword(newPassword);
+    if (username) user.username = username;
+    if (role) user.role = role;
+    user.status = status;
 
     await userRepo.save(user);
 
-    return res.status(200).json({ code: 200, message: "Data akun berhasil diperbarui!" });
+    return res.status(200).json({ code: 200, data: user, message: "Data akun berhasil diperbarui!" });
   } catch (error) {
     console.error("Error update akun:", error);
     return res.status(500).json({ code: 500, message: "Internal server error" });
@@ -182,6 +187,29 @@ export const getRole = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error mengambil role:", error);
+    return res.status(500).json({ code: 500, message: "Internal server error" });
+  }
+};
+
+export const deleteAccount = async (req: Request, res: Response) => {
+  try {
+    const { userid } = req.params;
+
+    const accountUserRepo = AppDataSource.getRepository(userAccount);
+    const userData = await accountUserRepo.findOne({ where: { id: Number(userid) } });
+
+    if (!userData) {
+      return res.status(404).json({ code: 404, message: "Data role tidak ditemukan" });
+    }
+
+    await accountUserRepo.delete({ id: Number(userid) });
+
+    return res.status(200).json({
+      code: 200,
+      message: `pengguna dengan username ${userData.username} berhasil dihapus dan dicatat ke log.`,
+    });
+  } catch (error) {
+    console.error("Gagal menghapus data:", error);
     return res.status(500).json({ code: 500, message: "Internal server error" });
   }
 };
