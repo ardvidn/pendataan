@@ -7,6 +7,7 @@ import { formatNop } from "../../../../utils/formatNOP";
 import { validateNOP } from "../../../../utils/validateNOP";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { ResponseData } from "@/utils/interface";
 
 const SearchNOP = () => {
   const [nop, setNop] = useState("");
@@ -37,6 +38,11 @@ const SearchNOP = () => {
     }
 
     try {
+      const responsePBB = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/datobjekpajak?nop=${rawNop}`);
+      if (responsePBB.status === 404) {
+        router.push("/pendataan/op_update");
+      }
+
       const response = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/checkdatoppajak/${rawNop}?pel=${12}`);
       const { code, data, message } = response.data;
 
@@ -48,6 +54,8 @@ const SearchNOP = () => {
       } else {
         toast.error("Respons server tidak dikenali.");
       }
+
+      console.log("uhuy");
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
         const { message } = error.response.data;
@@ -55,7 +63,6 @@ const SearchNOP = () => {
       } else {
         toast.error("Terjadi kesalahan saat mengecek NOP!");
       }
-      console.error("Error fetching data:", error);
     }
   };
 

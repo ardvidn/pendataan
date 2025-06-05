@@ -54,11 +54,13 @@ export default function UpdateNOPForm() {
         else {
           const response = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/datobjekpajak?nop=${paramsNOP.nop}`);
           const data = response.data.data;
+
           setSpopData(data.dat_op_pajak);
           setLspopData(data.dat_op_bangunan);
           setWajibPajak(data.wajib_pajak);
           setLatitude(data.dat_op_pajak.latitude);
           setLongitude(data.dat_op_pajak.longitude);
+          console.log(response.data.data);
         }
 
         // Fallback jika foto_op kosong
@@ -75,8 +77,14 @@ export default function UpdateNOPForm() {
             foto_op: imageUrls,
           }));
         }
-      } catch (error) {
-        console.error("Error mengambil data:", error);
+      } catch (error: any) {
+        if (error.response && error.response.status === 404) {
+          const { message } = error.response.data;
+          toast.error(message || "Data tidak ditemukan!");
+        } else {
+          toast.error("Terjadi kesalahan saat mengecek NOP!");
+        }
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }

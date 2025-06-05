@@ -203,7 +203,7 @@ export const getAllDatObjekPajak = async (req: Request, res: Response) => {
     if (datObjekPajaks === null || datObjekPajaks === undefined) {
       return res.status(404).json({
         code: 404,
-        message: "nop tidak ditemukan!!!",
+        message: `${nop} tidak ditemukan!!!`,
       });
     }
 
