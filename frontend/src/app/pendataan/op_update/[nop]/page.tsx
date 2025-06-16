@@ -169,8 +169,8 @@ export default function UpdateNOPForm() {
   return (
     <>
       <Toaster position="top-center" />
-      <Box width="fullwidth" height="100tvh" sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
-        <Box sx={{ width: "100%", p: 2 }}>
+      <Box mx={{ xs: -2, md: 0 }} height="100%" sx={{ backgroundColor: "#FFF", borderRadius: 2 }}>
+        <Box sx={{ p: 2 }}>
           <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
             {steps.map((label) => {
               if (isTanahKosong && label === "LSPOP") return null;

@@ -292,8 +292,6 @@ const SPOPFormBaru: React.FC<SPOPFormBaruProps> = ({
     return <Typography>Data SPOP tidak ditemukan untuk NOP: {nopBaru}</Typography>;
   }
 
-  console.log(spopData.kd_kec);
-
   return (
     <>
       <Box flex={1} maxWidth={{ xs: "100%", md: "30%" }} my={2}>
@@ -345,7 +343,7 @@ const SPOPFormBaru: React.FC<SPOPFormBaruProps> = ({
       </Box>
       <Divider />
       <Box mt={2}>
-        <TextField fullWidth label="Nomor Objek Pajak" name="nop" value={nopBaru ? formatNop(nopBaru) : nop ? formatNop(nop) : ""} disabled />
+        <TextField sx={{ width: { xs: "fullwidth", md: "100%" } }} label="Nomor Objek Pajak" name="nop" value={nopBaru ? formatNop(nopBaru) : nop ? formatNop(nop) : ""} disabled />
       </Box>
       <Box display="flex" flexWrap="wrap">
         <LetakOPdanDataBumiBaru spopData={spopData} setSpopData={setSpopData} zntOptions={zntOptions} showLahanKeterangan={showLahanKeterangan} onValidityChangeB={onValidityChangeB} handleRadioChange={handleRadioChange} />

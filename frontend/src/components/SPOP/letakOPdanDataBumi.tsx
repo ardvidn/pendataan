@@ -62,7 +62,6 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
                 </li>
               );
             }}
-            style={{ width: 500 }}
             renderInput={(params) => <TextField {...params} label="Jenis Pajak" placeholder="Jenis Pajak..." />}
           />
         </Box>

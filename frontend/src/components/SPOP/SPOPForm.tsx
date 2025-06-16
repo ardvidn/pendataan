@@ -249,52 +249,54 @@ export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, se
 
   return (
     <>
-      <Box mt={2}>
-        <TextField fullWidth label="Nomor Objek Pajak" name="nop" value={formatNop(nop)} disabled />
-      </Box>
-      <Box display="flex" flexWrap="wrap">
-        <LetakOPdanDataBumi
-          spopData={spopData}
-          setSpopData={setSpopData}
-          handleChange={handleChange}
-          handleRadioChange={handleRadioChange}
-          zntOptions={zntOptions}
-          showLahanKeterangan={showLahanKeterangan}
-          handleDateChange={handleDateChange}
-          handleAutocompleteChange={handleAutocompleteChange}
-          onValidityChangeB={onValidityChangeB}
-        />
+      <Box width="100%">
+        <Box mt={2}>
+          <TextField sx={{ width: { xs: "fullwidth", md: "100%" } }} label="Nomor Objek Pajak" name="nop" value={formatNop(nop)} disabled />
+        </Box>
+        <Box display="flex" flexWrap="wrap">
+          <LetakOPdanDataBumi
+            spopData={spopData}
+            setSpopData={setSpopData}
+            handleChange={handleChange}
+            handleRadioChange={handleRadioChange}
+            zntOptions={zntOptions}
+            showLahanKeterangan={showLahanKeterangan}
+            handleDateChange={handleDateChange}
+            handleAutocompleteChange={handleAutocompleteChange}
+            onValidityChangeB={onValidityChangeB}
+          />
 
-        <DataWPdanFoto
-          nop={nop}
-          spopData={spopData}
-          setSpopData={setSpopData}
-          handleAutocompleteChange={handleAutocompleteChange}
-          loadingWajibPajak={loadingWajibPajak}
-          wajibPajakOptions={wajibPajakOptions}
-          disableNoIdentitas={disableNoIdentitas}
-          setRawInputWajibPajak={setRawInputWajibPajak}
-          handleNestedChange={handleNestedChange}
-          setDisableNoIdentitas={setDisableNoIdentitas}
-          handleChange={handleChange}
-          handleDateChange={handleDateChange}
-          provinsiOptions={provinsiOptions}
-          valueProvinsi={valueProvinsi}
-          handleOnChangeKabupaten={handleOnChangeKabupaten}
-          kabupatenOptionsFiltered={kabupatenOptionsFiltered}
-          valueKabupaten={valueKabupaten}
-          handleOnChangeKecamatan={handleOnChangeKecamatan}
-          kecamatanOptionsFiltered={kecamatanOptionsFiltered}
-          valueKecamatan={valueKecamatan}
-          handleOnChangeKelurahan={handleOnChangeKelurahan}
-          kelurahanOptionsFiltered={kelurahanOptionsFiltered}
-          valueKelurahan={valueKelurahan}
-          setValueKelurahan={setValueKelurahan}
-          setWajibPajak={setWajibPajak}
-          rawInputWajibPajak={rawInputWajibPajak}
-          wajibPajak={wajibPajak}
-          onValidityChange={onValidityChange}
-        />
+          <DataWPdanFoto
+            nop={nop}
+            spopData={spopData}
+            setSpopData={setSpopData}
+            handleAutocompleteChange={handleAutocompleteChange}
+            loadingWajibPajak={loadingWajibPajak}
+            wajibPajakOptions={wajibPajakOptions}
+            disableNoIdentitas={disableNoIdentitas}
+            setRawInputWajibPajak={setRawInputWajibPajak}
+            handleNestedChange={handleNestedChange}
+            setDisableNoIdentitas={setDisableNoIdentitas}
+            handleChange={handleChange}
+            handleDateChange={handleDateChange}
+            provinsiOptions={provinsiOptions}
+            valueProvinsi={valueProvinsi}
+            handleOnChangeKabupaten={handleOnChangeKabupaten}
+            kabupatenOptionsFiltered={kabupatenOptionsFiltered}
+            valueKabupaten={valueKabupaten}
+            handleOnChangeKecamatan={handleOnChangeKecamatan}
+            kecamatanOptionsFiltered={kecamatanOptionsFiltered}
+            valueKecamatan={valueKecamatan}
+            handleOnChangeKelurahan={handleOnChangeKelurahan}
+            kelurahanOptionsFiltered={kelurahanOptionsFiltered}
+            valueKelurahan={valueKelurahan}
+            setValueKelurahan={setValueKelurahan}
+            setWajibPajak={setWajibPajak}
+            rawInputWajibPajak={rawInputWajibPajak}
+            wajibPajak={wajibPajak}
+            onValidityChange={onValidityChange}
+          />
+        </Box>
       </Box>
     </>
   );

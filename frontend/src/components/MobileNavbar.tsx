@@ -5,16 +5,27 @@ import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Modal, Box, Bu
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { logged } from "@/utils/interface";
 
 export default function MobileNavbar({ username }: { username: string }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    axios
+      .get<logged>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/auth/me`, { withCredentials: true })
+      .then((res) => {
+        setRole(res.data.data.role);
+      })
+      .catch(() => router.push("/login"));
+  }, [router]);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -86,8 +97,8 @@ export default function MobileNavbar({ username }: { username: string }) {
             textAlign: "center",
           }}
         >
-          <Typography variant="h6" gutterBottom>
-            Menu Pendataan
+          <Typography variant="h6" sx={{ color: "#1a1a2e" }} gutterBottom>
+            PENDATAAN
           </Typography>
           <Button fullWidth variant="outlined" sx={{ mb: 1 }} onClick={() => goTo("/pendataan/op_baru")}>
             OP Baru
@@ -95,9 +106,14 @@ export default function MobileNavbar({ username }: { username: string }) {
           <Button fullWidth variant="outlined" sx={{ mb: 1 }} onClick={() => goTo("/pendataan/op_update")}>
             OP Update
           </Button>
-          <Button fullWidth variant="outlined" onClick={() => goTo("/pendataan/op_hapus")}>
+          <Button fullWidth variant="outlined" sx={{ mb: 1 }} onClick={() => goTo("/pendataan/op_hapus")}>
             OP Hapus
           </Button>
+          {role === "admin" && (
+            <Button fullWidth variant="outlined" onClick={() => goTo("/pendataan/op_hapus")}>
+              Admin Dashboard
+            </Button>
+          )}
         </Box>
       </Modal>
     </>
