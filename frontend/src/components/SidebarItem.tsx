@@ -16,7 +16,7 @@ const SidebarItem = ({ open, useIcon, title, link }: { open: boolean; useIcon: a
       disablePadding
       sx={{
         display: "block",
-        bgcolor: isActive ? "#FFC107" : "transparent", // Warna latar belakang jika aktif
+        bgcolor: isActive ? "#FFC107" : "transparent",
       }}
       onClick={() => router.push(`/${link}`)}
     >
@@ -26,7 +26,7 @@ const SidebarItem = ({ open, useIcon, title, link }: { open: boolean; useIcon: a
           px: 2.5,
           justifyContent: open ? "initial" : "center",
           "&:hover": {
-            bgcolor: "#E0A800", // Warna saat hover
+            bgcolor: "#E0A800",
           },
         }}
       >
@@ -35,7 +35,7 @@ const SidebarItem = ({ open, useIcon, title, link }: { open: boolean; useIcon: a
             minWidth: 0,
             justifyContent: "center",
             mr: open ? 3 : "auto",
-            color: isActive ? "#000" : "inherit", // Ubah warna ikon jika aktif
+            color: isActive ? "#000" : "inherit",
           }}
         >
           {useIcon}
@@ -44,7 +44,7 @@ const SidebarItem = ({ open, useIcon, title, link }: { open: boolean; useIcon: a
           primary={title}
           sx={{
             opacity: open ? 1 : 0,
-            color: isActive ? "#000" : "inherit", // Ubah warna teks jika aktif
+            color: isActive ? "#000" : "inherit",
           }}
         />
       </ListItemButton>

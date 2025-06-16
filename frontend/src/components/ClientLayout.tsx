@@ -37,10 +37,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       });
   }, [pathname, router]);
 
-  // Saat status belum ditentukan, hindari render
   if (isAuthenticated === null) return null;
 
-  // Untuk halaman login, render langsung tanpa sidebar
   if (pathname === "/login") {
     return <>{children}</>;
   }

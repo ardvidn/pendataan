@@ -38,7 +38,6 @@ const OpHapus = () => {
   const [rawNop, setRawNop] = useState("");
   const router = useRouter();
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [totalItems, setTotalItems] = useState(0);
@@ -85,21 +84,19 @@ const OpHapus = () => {
     }
   };
 
-  // Ambil data saat pertama kali load
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // handle on change search nop
   const handleNopChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ""); // Hanya angka
+    const value = e.target.value.replace(/\D/g, "");
     setRawNop(value);
 
-    const formattedNop = formatNop(value); // Format ulang berdasarkan angka saja
+    const formattedNop = formatNop(value);
     setNop(formattedNop);
 
     if (!value) {
-      setError(""); // Hapus error jika input kosong
+      setError("");
       setIsSearching(false);
       fetchData();
     } else if (formattedNop.length === 24 && validateNOP(formattedNop)) {
@@ -112,7 +109,7 @@ const OpHapus = () => {
   const handleItemsPerPageChange = (e: any) => {
     const newItemsPerPage = e.target.value;
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset to first page when changing items per page
+    setCurrentPage(1);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -125,8 +122,8 @@ const OpHapus = () => {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace") {
-      setRawNop((prev) => prev.slice(0, -1)); // Hapus angka terakhir sebelum formatting
-      setNop(formatNop(rawNop.slice(0, -1))); // Update tampilan dengan format baru
+      setRawNop((prev) => prev.slice(0, -1));
+      setNop(formatNop(rawNop.slice(0, -1)));
     }
   };
 
@@ -168,8 +165,8 @@ const OpHapus = () => {
                 type="search"
                 sx={{
                   flexGrow: 1,
-                  "& input::-webkit-search-cancel-button": { display: "none" }, // Hapus tombol "X" di Chrome
-                  "& input[type=search]::-ms-clear": { display: "none" }, // Hapus tombol "X" di Edge
+                  "& input::-webkit-search-cancel-button": { display: "none" },
+                  "& input[type=search]::-ms-clear": { display: "none" },
                 }}
                 value={nop}
                 onChange={handleNopChange}
@@ -177,11 +174,9 @@ const OpHapus = () => {
                 helperText={error}
                 onKeyDown={handleKeyDown}
                 onBlur={() => {
-                  // Jika kosong, hapus error
                   if (!nop) {
                     setError("");
                   } else {
-                    // Atau lakukan validasi ulang di sini jika perlu
                     const isValid = /^\d{18}$/.test(rawNop);
                     setError(isValid ? "" : "Format NOP harus 18 digit angka.");
                   }
@@ -193,10 +188,9 @@ const OpHapus = () => {
                 fullWidth
                 variant="contained"
                 onClick={(e) => {
-                  e.preventDefault(); // Prevent default form submission if needed
-                  fetchSearchData(); // Call with default parameters
+                  e.preventDefault();
+                  fetchSearchData();
                 }}
-                // disabled={!isLoggedIn || loading}
                 sx={{
                   mt: { xs: 1, md: 0 },
                   ml: { xs: 0, md: 0 },
@@ -214,8 +208,8 @@ const OpHapus = () => {
                 onClick={handleRefresh}
                 color="error"
                 sx={{
-                  visibility: isSearching ? "visible" : "hidden", // Tetap mempertahankan ukuran
-                  pointerEvents: isSearching ? "auto" : "none", // Tidak bisa diklik jika tidak searching
+                  visibility: isSearching ? "visible" : "hidden",
+                  pointerEvents: isSearching ? "auto" : "none",
                   transition: "opacity 0.3s ease-in-out",
                   opacity: isSearching ? 1 : 0,
                 }}
@@ -304,43 +298,17 @@ const OpHapus = () => {
               </Table>
             </TableContainer>
           </Box>
-          {/* Pagination Controls */}
           <Box display="flex" justifyContent="space-between" alignItems="center" p={2} mt={2}>
-            {/* <Typography variant="body2">{`${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, totalItems)} of ${totalItems}`}</Typography>
-
-            <Box display="flex" alignItems="center" gap={2}>
-              <FormControl size="small" sx={{ minWidth: 80 }}>
-                <InputLabel>Show</InputLabel>
-                <Select value={itemsPerPage} onChange={handleItemsPerPageChange} label="Show">
-                  <MenuItem value={5}>5</MenuItem>
-                  <MenuItem value={10}>10</MenuItem>
-                  <MenuItem value={25}>25</MenuItem>
-                  <MenuItem value={50}>50</MenuItem>
-                </Select>
-              </FormControl>
-
-              <Box display="flex" alignItems={"center"} gap={1}>
-                <Button variant="outlined" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
-                  Previous
-                </Button>
-                <Button variant="outlined" disabled={currentPage >= totalPages || totalPages === 0} onClick={() => handlePageChange(currentPage + 1)}>
-                  Next
-                </Button>
-                <Typography color="#023047" variant="body1">
-                  {totalItems > 0 ? `${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, totalItems)} of ${totalItems}` : "0 of 0"}
-                </Typography>
-              </Box>
-            </Box> */}
             <Box display="flex" justifyContent="space-between" alignItems="center" p={2} mt={2}>
               <TablePagination
                 component="div"
                 count={totalItems}
-                page={currentPage - 1} // TablePagination menggunakan zero-based index
-                onPageChange={(event: any, newPage: number) => handlePageChange(newPage + 1)} // Konversi ke one-based index
+                page={currentPage - 1}
+                onPageChange={(event: any, newPage: number) => handlePageChange(newPage + 1)}
                 rowsPerPage={itemsPerPage}
                 onRowsPerPageChange={(event: any) => {
                   handleItemsPerPageChange(event);
-                  handlePageChange(1); // Reset ke halaman pertama saat mengubah items per page
+                  handlePageChange(1);
                 }}
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 labelRowsPerPage="Show:"

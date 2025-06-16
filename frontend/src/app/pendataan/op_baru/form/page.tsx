@@ -107,7 +107,7 @@ const FormOpBaru = () => {
     if (isLastStep) {
       const updatedSpopData = {
         ...spopData,
-        user_pelayanan: username, //
+        user_pelayanan: username,
         kd_jns_pelayanan: "11",
         kd_pelayanan: "1",
         log_by: username,
@@ -128,11 +128,9 @@ const FormOpBaru = () => {
         console.log(error);
       }
       console.log("Submit data:", payload);
-      // Kirim ke backend jika diperlukan
     } else {
-      // Skip LSPOP jika tanah kosong
       if (isTanahKosong && activeStep === 0) {
-        setActiveStep((prev) => prev + 2); // lompat dari SPOP ke Location
+        setActiveStep((prev) => prev + 2);
       } else {
         setActiveStep((prev) => prev + 1);
       }
@@ -141,7 +139,7 @@ const FormOpBaru = () => {
 
   const handleBack = () => {
     if (isTanahKosong && activeStep === 2) {
-      setActiveStep((prev) => prev - 2); // kembali langsung ke SPOP
+      setActiveStep((prev) => prev - 2);
     } else {
       setActiveStep((prev) => prev - 1);
     }

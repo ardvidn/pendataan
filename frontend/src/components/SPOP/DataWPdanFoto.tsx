@@ -134,43 +134,24 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                   const numericOnly = newInputValue.replace(/\D/g, "").slice(0, 20);
                   setRawInputWajibPajak(numericOnly);
                   setWajibPajak({ ...wajibPajak, ["no_identitas"]: numericOnly });
-                  // handleChange("subjekPajak", "nmWp", ""); // reset nama saat mengetik
                 }}
                 onChange={(e, newValue) => {
                   if (typeof newValue === "string") {
                     const numericOnly = newValue.replace(/\D/g, "").slice(0, 20);
-                    // handleChange("no_identitas", numericOnly);
-                    // handleChange("nm_wp", "");
                     setWajibPajak({ ...wajibPajak, ["no_identitas"]: numericOnly });
                     setWajibPajak({ ...wajibPajak, ["nm_wp"]: "" });
                     setRawInputWajibPajak(numericOnly);
                   } else if (newValue?.value && newValue.value !== "not_found") {
-                    // handleChange("no_identitas", newValue.value);
-                    // handleChange("nm_wp", newValue.namaWajibPajak || "");
                     setWajibPajak({ ...wajibPajak, ["no_identitas"]: newValue.value });
                     setWajibPajak({ ...wajibPajak, ["nm_wp"]: newValue.nm_wp || "" });
                     setRawInputWajibPajak(`${newValue.value} - ${newValue.nm_wp}`);
                   } else {
-                    // handleChange("no_identitas", "");
-                    // handleChange("nm_wp", "");
                     setWajibPajak({ ...wajibPajak, ["no_identitas"]: "" });
                     setWajibPajak({ ...wajibPajak, ["nm_wp"]: "" });
                     setRawInputWajibPajak("");
                   }
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    required
-                    {...params}
-                    label="No Identitas"
-                    //   error={rawInputWajibPajak !== "" && rawInputwajibPajak.replace(/\D/g, "").length !== 20}
-                    //   helperText={rawInputWajibPajak !== "" && rawInputwajibPajak.replace(/\D/g, "").length !== 20 ? "Harus 16 digit angka" : " "}
-                    //   inputProps={{
-                    //     ...params.inputProps,
-                    //     maxLength: 20,
-                    //   }}
-                  />
-                )}
+                renderInput={(params) => <TextField required {...params} label="No Identitas" />}
               />
 
               <Autocomplete
@@ -178,19 +159,14 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                 options={jenisBadanUsahaOptions}
                 value={wajibPajak.jns_identitas || ""}
                 onChange={(e, newValue) => {
-                  // handleAutocompleteChange("jns_identitas", newValue);
                   setWajibPajak({ ...wajibPajak, ["jns_identitas"]: newValue });
                   if (newValue === "RANDOM") {
                     setRawInputWajibPajak(nop);
-                    // handleChange("no_identitas", nop);
-                    // handleChange("nm_wp", "");
                     setWajibPajak({ ...wajibPajak, ["no_identitas"]: nop });
                     setWajibPajak({ ...wajibPajak, ["nm_wp"]: "" });
                     setDisableNoIdentitas(true);
-                    // setDisableNpwp(true);
                   } else {
                     setDisableNoIdentitas(false);
-                    // setDisableNpwp(false);
                   }
                 }}
                 renderInput={(params) => <TextField required {...params} label="Jenis Badan Usaha" fullWidth />}
@@ -309,7 +285,6 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                   const numericOnly = newInputValue.replace(/\D/g, "").slice(0, 20);
                   setRawInputWajibPajak(numericOnly);
                   setWajibPajak({ ...wajibPajak, ["no_identitas"]: numericOnly });
-                  // handleNestedChange("subjekPajak", "nmWp", ""); // reset nama saat mengetik
                 }}
                 onChange={(e, newValue) => {
                   if (typeof newValue === "string") {
@@ -327,19 +302,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                     setRawInputWajibPajak("");
                   }
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    required
-                    {...params}
-                    label="No Identitas"
-                    //   error={rawInputWajibPajak !== "" && rawInputwajibPajak.replace(/\D/g, "").length !== 20}
-                    //   helperText={rawInputWajibPajak !== "" && rawInputwajibPajak.replace(/\D/g, "").length !== 20 ? "Harus 16 digit angka" : " "}
-                    //   inputProps={{
-                    //     ...params.inputProps,
-                    //     maxLength: 20,
-                    //   }}
-                  />
-                )}
+                renderInput={(params) => <TextField required {...params} label="No Identitas" />}
               />
 
               <Autocomplete

@@ -89,7 +89,6 @@ const RolePage = () => {
     }
   };
 
-  // Ambil data saat pertama kali load
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -122,7 +121,7 @@ const RolePage = () => {
   const handleItemsPerPageChange = (e: any) => {
     const newItemsPerPage = e.target.value;
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset to first page when changing items per page
+    setCurrentPage(1);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -178,24 +177,19 @@ const RolePage = () => {
       }
       console.error("Error fetching data:", error);
     }
-    // console.log(data);
   };
 
-  // Edit role
   const handleEditRole = async (data: RoleOptions) => {
     try {
-      // 1. Ambil data terbaru dari backend
       const getResponse = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getaccountrolebyid/${data.id}`);
-      const currentData = getResponse.data.data; // misalnya { id, Role, akses }
+      const currentData = getResponse.data.data;
 
-      // 2. Gabungkan data lama dengan yang baru (jaga-jaga jika ada field lain yang harus dipertahankan)
       const updatedPayload = {
         ...currentData,
         Role: data.Role,
         akses: data.Akses,
       };
 
-      // 3. Kirim PUT untuk update
       const putResponse = await axios.put(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/put/editaccountrole/${data.id}`, updatedPayload);
 
       const updatedRole = putResponse.data;
@@ -219,7 +213,6 @@ const RolePage = () => {
                 bgcolor: currentPath === "role" ? "#E0A800" : "transparent",
               },
             }}
-            // startIcon={<AddIcon />}
             onClick={handleGoToRole}
           >
             Role
@@ -233,7 +226,6 @@ const RolePage = () => {
                 bgcolor: currentPath === "user" ? "#E0A800" : "transparent",
               },
             }}
-            // startIcon={<AddIcon />}
             onClick={handleGoToUser}
           >
             User
@@ -348,18 +340,17 @@ const RolePage = () => {
               </Table>
             </TableContainer>
           </Box>
-          {/* Pagination Controls */}
           <Box display="flex" justifyContent="space-between" alignItems="center" p={2} mt={2}>
             <Box display="flex" justifyContent="space-between" alignItems="center" p={2} mt={2}>
               <TablePagination
                 component="div"
                 count={totalItems}
-                page={currentPage - 1} // TablePagination menggunakan zero-based index
-                onPageChange={(event: any, newPage: number) => handlePageChange(newPage + 1)} // Konversi ke one-based index
+                page={currentPage - 1}
+                onPageChange={(event: any, newPage: number) => handlePageChange(newPage + 1)}
                 rowsPerPage={itemsPerPage}
                 onRowsPerPageChange={(event: any) => {
                   handleItemsPerPageChange(event);
-                  handlePageChange(1); // Reset ke halaman pertama saat mengubah items per page
+                  handlePageChange(1);
                 }}
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 labelRowsPerPage="Show:"

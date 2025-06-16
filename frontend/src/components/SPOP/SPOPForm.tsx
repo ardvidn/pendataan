@@ -117,7 +117,7 @@ export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, se
 
     const handler = setTimeout(() => {
       fetchWajibPajak(rawInputWajibPajak);
-    }, 300); // ⏱️ debounce 300ms
+    }, 300);
 
     return () => clearTimeout(handler);
   }, [rawInputWajibPajak]);
@@ -188,7 +188,6 @@ export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, se
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // setSpopData({ ...spopData, [name]: value });
 
     setSpopData((prevData: any) => ({
       ...prevData,
@@ -209,10 +208,6 @@ export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, se
   const handleDateChange = (name: string, value: Date | null) => {
     setSpopData({ ...spopData, [name]: value });
   };
-
-  // const handleAutocompleteChange = (name: string, value: string) => {
-  //   setSpopData({ ...spopData, [name]: value });
-  // };
 
   const handleAutocompleteChange = (name: string, value: string, index?: number) => {
     if (["kdZnt", "jnsBumi"].includes(name) && typeof index === "number") {

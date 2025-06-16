@@ -17,7 +17,6 @@ interface GeoInputWithMapProps {
   onValidityChange: (isValid: boolean) => void;
 }
 
-// Default Leaflet marker config
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",

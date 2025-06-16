@@ -121,7 +121,7 @@ const UserPage = () => {
   const handleItemsPerPageChange = (e: any) => {
     const newItemsPerPage = e.target.value;
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset to first page when changing items per page
+    setCurrentPage(1);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -179,20 +179,16 @@ const UserPage = () => {
       }
       console.error("Error fetching data:", error);
     }
-    // console.log(data);
   };
 
-  // Edit role
   const handleEditUser = async (data: UserOptions) => {
     try {
-      // 2. Gabungkan data lama dengan yang baru (jaga-jaga jika ada field lain yang harus dipertahankan)
       const updatedPayload = {
         username: data.username,
         role: data.role,
         status: data.status,
       };
 
-      // 3. Kirim PUT untuk update
       await axios.put(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/auth/update/${data.id}`, updatedPayload);
 
       toast.success("user berhasil diupdate!!!");
@@ -214,7 +210,6 @@ const UserPage = () => {
                 bgcolor: currentPath === "role" ? "#E0A800" : "transparent",
               },
             }}
-            // startIcon={<AddIcon />}
             onClick={handleGoToRole}
           >
             Role
@@ -228,7 +223,6 @@ const UserPage = () => {
                 bgcolor: currentPath === "user" ? "#E0A800" : "transparent",
               },
             }}
-            // startIcon={<AddIcon />}
             onClick={handleGoToUser}
           >
             User
@@ -350,17 +344,16 @@ const UserPage = () => {
               </Table>
             </TableContainer>
           </Box>
-          {/* Pagination Controls */}
           <Box display="flex" justifyContent="space-between" alignItems="center" p={2} mt={2}>
             <TablePagination
               component="div"
               count={totalItems}
-              page={currentPage - 1} // TablePagination menggunakan zero-based index
-              onPageChange={(event: any, newPage: number) => handlePageChange(newPage + 1)} // Konversi ke one-based index
+              page={currentPage - 1}
+              onPageChange={(event: any, newPage: number) => handlePageChange(newPage + 1)}
               rowsPerPage={itemsPerPage}
               onRowsPerPageChange={(event: any) => {
                 handleItemsPerPageChange(event);
-                handlePageChange(1); // Reset ke halaman pertama saat mengubah items per page
+                handlePageChange(1);
               }}
               rowsPerPageOptions={[5, 10, 25, 50]}
               labelRowsPerPage="Show:"

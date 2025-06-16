@@ -21,7 +21,7 @@ export default function LoginPage() {
 
       toast.success("Login berhasil!");
 
-      router.push("/pendataan/op_update"); //maps
+      router.push("/pendataan/op_update");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login gagal!");
@@ -50,10 +50,10 @@ export default function LoginPage() {
                 disabled={loading}
                 sx={{
                   mt: 2,
-                  bgcolor: "#FFC107", // Warna tombol
-                  color: "#000", // Warna teks agar kontras
+                  bgcolor: "#FFC107",
+                  color: "#000",
                   "&:hover": {
-                    bgcolor: "#E0A800", // Warna saat hover
+                    bgcolor: "#E0A800",
                   },
                 }}
               >
@@ -62,7 +62,6 @@ export default function LoginPage() {
             </form>
           </Box>
 
-          {/* Gambar Logo */}
           <Box>
             <Image src="/geomatrixfull.jpg" alt="geomatrix" width={400} height={400} />
           </Box>

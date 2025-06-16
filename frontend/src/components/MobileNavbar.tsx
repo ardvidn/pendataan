@@ -1,4 +1,3 @@
-// components/MobileNavbar.tsx
 "use client";
 
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Modal, Box, Button } from "@mui/material";

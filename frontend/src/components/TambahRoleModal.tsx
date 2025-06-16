@@ -28,7 +28,7 @@ const TambahRoleModal: React.FC<TambahRoleModalProps> = ({ open, mode, initialDa
           const fetched = res.data.data;
 
           setRoleName(fetched.Role);
-          setAksesAdmin(fetched.akses); // asumsi field dari backend bernama `akses`
+          setAksesAdmin(fetched.akses);
         } catch (error) {
           console.error("Gagal ambil data role:", error);
         }
@@ -41,7 +41,6 @@ const TambahRoleModal: React.FC<TambahRoleModalProps> = ({ open, mode, initialDa
     if (open) fetchData();
   }, [mode, initialData?.id, open]);
 
-  // isi data ketika mode edit
   useEffect(() => {
     if (mode === "edit" && initialData) {
       setRoleName(initialData.Role);
@@ -71,7 +70,7 @@ const TambahRoleModal: React.FC<TambahRoleModalProps> = ({ open, mode, initialDa
         await onAdd(payload);
       }
       handleClose();
-      window.location.reload(); // ⬅️ reload di sini
+      window.location.reload();
     } catch (error) {
       console.error("Gagal menyimpan role:", error);
     }

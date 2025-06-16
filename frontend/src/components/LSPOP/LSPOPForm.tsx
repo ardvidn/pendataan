@@ -61,7 +61,7 @@ export const LSPOPForm = ({ nop, lspopData, setLspopData, onValidityChange }: ls
     const usedNumbers = buildings.map((b) => parseInt(b.no_bng || "0", 10)).filter((n) => !isNaN(n));
 
     const maxNo = usedNumbers.length ? Math.max(...usedNumbers) : 0;
-    return (maxNo + 1).toString(); // contoh hasil: "001", "002", ...
+    return (maxNo + 1).toString();
   };
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export const LSPOPForm = ({ nop, lspopData, setLspopData, onValidityChange }: ls
           onClick={() => {
             const newNoBng = getNextNoBng(lspopData);
             setCurrentBuilding({
-              no_bng: newNoBng, // <-- penting!
+              no_bng: newNoBng,
               kd_jpb: "",
               bng_luas: "",
               bng_jml_lantai: "",

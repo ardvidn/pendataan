@@ -121,7 +121,6 @@ const SPOPFormBaru: React.FC<SPOPFormBaruProps> = ({
 
       const response = await axios.get<ApiResponse<WajibPajak>>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/wajibpajak?noIdentitas=${onlyDigits}`);
 
-      // Cek response code dalam body
       if (response.status === 200 && response.data.code === 404) {
         console.log("Nomor identitas tidak ditemukan!");
 
@@ -164,7 +163,7 @@ const SPOPFormBaru: React.FC<SPOPFormBaruProps> = ({
 
     const handler = setTimeout(() => {
       fetchWajibPajak(rawInputWajibPajak);
-    }, 300); // ⏱️ debounce 300ms
+    }, 300);
 
     return () => clearTimeout(handler);
   }, [rawInputWajibPajak]);

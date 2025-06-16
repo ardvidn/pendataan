@@ -28,7 +28,7 @@ interface LetakOPdanDataBumiProps {
 }
 const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSpopData, zntOptions, showLahanKeterangan, onValidityChangeB }) => {
   useEffect(() => {
-    const isValid = spopData.jalan_op && spopData.total_luas_bumi && spopData.kd_znt && spopData.jns_bumi && spopData.jns_peruntukan && spopData.jns_asaltanah && spopData.kd_status_wp; // contoh field
+    const isValid = spopData.jalan_op && spopData.total_luas_bumi && spopData.kd_znt && spopData.jns_bumi && spopData.jns_peruntukan && spopData.jns_asaltanah && spopData.kd_status_wp;
 
     onValidityChangeB(isValid);
   }, [spopData, onValidityChangeB]);
@@ -50,7 +50,7 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
             getOptionLabel={(option) => option.jenispajak}
             value={spopData.jenis_pajak?.map((item: any) => ({ jenispajak: item })) || []}
             onChange={(e, newValue) => {
-              const selectedValues = newValue.map((item) => item.jenispajak); // Ambil value string-nya saja
+              const selectedValues = newValue.map((item) => item.jenispajak);
               setSpopData({ ...spopData, jenis_pajak: selectedValues });
             }}
             renderOption={(props, option, { selected }) => {
@@ -66,7 +66,6 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
           />
         </Box>
         <Box mt={2}>
-          {/* <DateInput label="Tanggal Sertifikat" name="tanggalSertifikat" value={spopData.tgl_sertifikat || ""} onChange={handleDateChange} /> */}
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               value={dayjs(spopData.tgl_sertifikat) || null}
@@ -88,12 +87,6 @@ const LetakOPdanDataBumi: React.FC<LetakOPdanDataBumiProps> = ({ spopData, setSp
             fullWidth
             label="No Sertifikat"
             value={formatNoSertifikat(spopData.no_sertifikat || "")}
-            // onChange={(e) =>
-            //   setSpopData((prev: any) => ({
-            //     ...prev,
-            //     no_sertifikat: e.target.value.replace(/\D/g, ""),
-            //   }))
-            // }
             onChange={(e) => setSpopData({ ...spopData, ["no_sertifikat"]: e.target.value.replace(/\D/g, "") })}
             error={!!spopData.no_sertifikat && !isNoSertifikatValid(spopData.no_sertifikat)}
             helperText={!!spopData.no_sertifikat && !isNoSertifikatValid(spopData.no_sertifikat) ? "Harus diisi lengkap (format: 11.11.11.11.1.11111)" : " "}

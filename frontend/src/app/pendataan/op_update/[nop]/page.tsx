@@ -71,7 +71,6 @@ export default function UpdateNOPForm() {
           if (fotoResponse.data.isEmpty === true) {
             return;
           }
-          // Inject ke spopData
           setSpopData((prev) => ({
             ...prev,
             foto_op: imageUrls,
@@ -121,7 +120,7 @@ export default function UpdateNOPForm() {
     if (isLastStep) {
       const updatedSpopData = {
         ...spopData,
-        user_pelayanan: username, //
+        user_pelayanan: username,
         kd_jns_pelayanan: "12",
         kd_pelayanan: "2",
         log_by: username,
@@ -140,12 +139,9 @@ export default function UpdateNOPForm() {
       } catch (error) {
         console.log(error);
       }
-      console.log("Submit data:", payload);
-      // Kirim ke backend jika diperlukan
     } else {
-      // Skip LSPOP jika tanah kosong
       if (isTanahKosong && activeStep === 0) {
-        setActiveStep((prev) => prev + 2); // lompat dari SPOP ke Location
+        setActiveStep((prev) => prev + 2);
       } else {
         setActiveStep((prev) => prev + 1);
       }
@@ -154,7 +150,7 @@ export default function UpdateNOPForm() {
 
   const handleBack = () => {
     if (isTanahKosong && activeStep === 2) {
-      setActiveStep((prev) => prev - 2); // kembali langsung ke SPOP
+      setActiveStep((prev) => prev - 2);
     } else {
       setActiveStep((prev) => prev - 1);
     }

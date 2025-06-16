@@ -9,7 +9,6 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
 
-// Swiper
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -54,7 +53,6 @@ const UploadFotoPersilBoxBaru: React.FC<UploadFotoPersilBoxBaruProps> = ({ spopD
           const response = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${spopData.nop}?count=${uploadedUrls.length}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
           const urls = response.data.imageUrls;
           if (Array.isArray(urls)) {
-            // Hanya tambahkan URL yang belum ada (mencegah duplikat jika backend return array penuh)
             const freshUrls = urls.filter((url) => !uploadedUrls.includes(url));
             newUrls.push(...freshUrls);
           }
@@ -83,9 +81,9 @@ const UploadFotoPersilBoxBaru: React.FC<UploadFotoPersilBoxBaruProps> = ({ spopD
 
   const handleDeleteFoto = async (imageUrl: string) => {
     try {
-      const path = new URL(imageUrl).pathname; // "/dpzaqmc70/image/upload/vxxxx/fotopersil/621308000800300360_1.png"
-      const fileName = path.split("/").pop(); // "621308000800300360_1.png"
-      const publicId = `${fileName?.split(".")[0]}.${fileName?.split(".")[1]}`; // "621308000800300360_1"
+      const path = new URL(imageUrl).pathname;
+      const fileName = path.split("/").pop();
+      const publicId = `${fileName?.split(".")[0]}.${fileName?.split(".")[1]}`;
 
       if (!publicId) throw new Error("Gagal extract publicId dari URL");
 

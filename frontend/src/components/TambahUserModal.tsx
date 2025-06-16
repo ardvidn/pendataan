@@ -28,7 +28,7 @@ const TambahUserModal: React.FC<TambahUserModalProps> = ({ open, mode, initialDa
       try {
         const res = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getaccountrole`);
         if (Array.isArray(res.data.data)) {
-          setRolesOptions(res.data.data.map((item: any) => item.Role)); // asumsi respons berisi array string role
+          setRolesOptions(res.data.data.map((item: any) => item.Role));
         }
       } catch (error) {
         console.error("Gagal ambil data role:", error);
@@ -50,7 +50,7 @@ const TambahUserModal: React.FC<TambahUserModalProps> = ({ open, mode, initialDa
           setUsername(fetched.username);
           setPassword(fetched.password);
           setRole(fetched.role);
-          setStatus(fetched.status); // asumsi field dari backend bernama `akses`
+          setStatus(fetched.status);
         } catch (error) {
           console.error("Gagal ambil data user:", error);
         }
@@ -65,7 +65,6 @@ const TambahUserModal: React.FC<TambahUserModalProps> = ({ open, mode, initialDa
     if (open) fetchData();
   }, [mode, initialData?.id, open]);
 
-  // isi data ketika mode edit
   useEffect(() => {
     if (mode === "edit" && initialData) {
       setUsername(initialData.username);
@@ -79,17 +78,12 @@ const TambahUserModal: React.FC<TambahUserModalProps> = ({ open, mode, initialDa
   }, [mode, initialData, open]);
 
   const handleSubmit = async () => {
-    // if (roleName.trim() === "") {
-    //   setError(true);
-    //   return;
-    // }
-
     const payload: UserOptions = {
       ...(initialData && { id: initialData.id }),
       username,
       role,
       status,
-      ...(mode === "add" && { password }), // hanya saat tambah user
+      ...(mode === "add" && { password }),
     };
 
     try {
@@ -100,7 +94,6 @@ const TambahUserModal: React.FC<TambahUserModalProps> = ({ open, mode, initialDa
       }
       handleClose();
       window.location.reload();
-      // ⬅️ reload di sini
     } catch (error) {
       console.error("Gagal menyimpan user:", error);
     }

@@ -34,7 +34,7 @@ const SearchNOP = () => {
   const handleSubmit = async () => {
     if (!validateNOP(nop)) {
       setError("Format NOP tidak valid!");
-      return; // berhenti kalau format tidak valid
+      return;
     }
 
     try {

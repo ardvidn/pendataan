@@ -59,7 +59,6 @@ export default function OpHapusForm() {
     const fetchDatOpPajakUpdateNOP = async () => {
       try {
         if (isFromEdit) {
-          // Ambil data dari kedua API
           const [pendataanRes, pbbRes] = await Promise.all([
             axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdatebynop?nop=${paramsNOP.nop}`),
             axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/datobjekpajak?nop=${paramsNOP.nop}`),
@@ -68,7 +67,6 @@ export default function OpHapusForm() {
           const dataPendataan = pendataanRes.data.data;
           const dataPBB = pbbRes.data.data;
 
-          // Gunakan data dari PBB, kecuali `keterangan` dari Pendataan
           setSpopData({
             ...dataPBB.dat_op_pajak,
             keterangan: dataPendataan.dat_op_pajak.keterangan || "",
@@ -78,7 +76,6 @@ export default function OpHapusForm() {
 
           console.log("Data dari PBB + keterangan dari Pendataan");
         } else {
-          // Jika bukan dari edit, hanya ambil dari PBB
           const response = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PBB_API_URL}/api/retrieve/datobjekpajak?nop=${paramsNOP.nop}`);
           const data = response.data.data;
           setSpopData(data.dat_op_pajak);
@@ -117,7 +114,7 @@ export default function OpHapusForm() {
   const handleFinish = async () => {
     const updatedSpopData = {
       ...spopData,
-      user_pelayanan: username, //
+      user_pelayanan: username,
       kd_jns_pelayanan: "13",
       kd_pelayanan: "3",
       log_by: username,
@@ -141,7 +138,6 @@ export default function OpHapusForm() {
     }
     console.log("Data siap dikirim:", payload);
     console.log("Data siap dikirim:", spopData);
-    // Lanjutkan dengan submit ke backend atau navigasi
   };
 
   return (
@@ -271,12 +267,7 @@ export default function OpHapusForm() {
           </CustomTabPanel>
         </Box>
         <Box sx={{ borderTop: 1, borderColor: "divider", p: 2, textAlign: "right" }}>
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "#219EBC", color: "#FFF" }}
-            disabled={!isSpopValid}
-            onClick={handleFinish} // pastikan handleFinish kamu buat
-          >
+          <Button variant="contained" sx={{ backgroundColor: "#219EBC", color: "#FFF" }} disabled={!isSpopValid} onClick={handleFinish}>
             Finish
           </Button>
         </Box>

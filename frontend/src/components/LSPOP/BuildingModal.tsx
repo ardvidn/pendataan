@@ -58,19 +58,6 @@ export const BuildingModal = ({ open, onClose, onSave, building, nextNoBng }: Bu
     }
   }, [building, getDefaultData, open]);
 
-  // no_bng: building.no_bng,
-  //       jenisBangunan: building.jenisBangunan,
-  //       luasBangunan: building.luasBangunan,
-  //       jumlahLantai: building.jumlahLantai,
-  //       tahunDibangun: building.tahunDibangun,
-  //       tahunDirenovasi: building.tahunDirenovasi,
-  //       kondisiBangunan: building.kondisiBangunan,
-  //       konstruksiBangunan: building.konstruksiBangunan,
-  //       atapBangunan: building.atapBangunan,
-  //       dindingBangunan: building.dindingBangunan,
-  //       lantaiBangunan: building.lantaiBangunan,
-  //       langitLangitBangunan: building.langitLangitBangunan,
-
   const handleChange = (field: keyof BuildingData, value: string) => {
     setTempData((prev) => ({ ...prev, [field]: value }));
   };
