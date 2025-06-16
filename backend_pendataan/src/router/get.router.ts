@@ -5,6 +5,7 @@ import { getKodeKabupaten, getKodeKecamatan, getKodeKelurahan, getKodeProvinsi }
 import { Router } from "express";
 import { getAccountRole, getAccountRoleById, getAccountRoleBySearch } from "../controller/role";
 import { getAccountUser, getAccountUserById, getAccountUserBySearch } from "../controller/user";
+import { getTitikPendataan } from "../controller/titikpendataan";
 
 const getRouter = Router();
 
@@ -25,5 +26,6 @@ getRouter.get("/getaccountrolebyid/:roleid", getAccountRoleById as any);
 getRouter.get("/getuseraccount", getAccountUser as any);
 getRouter.get("/getuseraccountbysearch", getAccountUserBySearch as any);
 getRouter.get("/getuseraccountbyid/:userid", getAccountUserById as any);
+getRouter.get("/gettitikpendataan", getTitikPendataan as any);
 
 export default getRouter;

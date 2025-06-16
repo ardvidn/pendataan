@@ -79,7 +79,7 @@ export const inputDatOpPajakUpdate = async (req: Request, res: Response) => {
       nop_join: formatNop(nop),
       geom: {
         type: "Point",
-        coordinates: [parseFloat(req.body.dat_op_pajak.latitude), parseFloat(req.body.dat_op_pajak.longitude)],
+        coordinates: [parseFloat(req.body.dat_op_pajak.longitude), parseFloat(req.body.dat_op_pajak.latitude)],
       },
       uuid: existingOpPajak?.uuid || uuidUtama,
       jns_peruntukan: getKeyByContainsValue(jns_peruntukanOptions, req.body.dat_op_pajak.jns_peruntukan),
