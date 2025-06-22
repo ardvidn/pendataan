@@ -30,7 +30,7 @@ interface dataProps {
   tgl_pelayanan: string;
 }
 
-const OpHapus = () => {
+const OpBaru = () => {
   const [data, setData] = useState<dataProps[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
@@ -142,6 +142,7 @@ const OpHapus = () => {
   const handleDeleteButton = async (nop: string) => {
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/deleteobjekpajak/${nop}`);
+      await axios.delete<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${nop}`);
       toast.success(`berhasil menghapus data!!!`);
     } catch (error) {
       toast.error("error saat menghapus data!!!");
@@ -340,4 +341,4 @@ const OpHapus = () => {
   );
 };
 
-export default OpHapus;
+export default OpBaru;

@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "res.cloudinary.com", // Moved from domains to remotePatterns
+        hostname: "fotopersil-demo.s3.ap-southeast-2.amazonaws.com", // Moved from domains to remotePatterns
       },
       // {
       //   protocol: "https",

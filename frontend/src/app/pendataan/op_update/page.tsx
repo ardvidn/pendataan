@@ -142,6 +142,7 @@ const OpUpdate = () => {
   const handleDeleteButton = async (nop: string) => {
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/deleteobjekpajak/${nop}`);
+      await axios.delete<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${nop}`);
       toast.success(`berhasil menghapus data!!!`);
     } catch (error) {
       toast.error("error saat menghapus data!!!");

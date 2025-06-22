@@ -48,13 +48,21 @@ const FormOpBaru = () => {
         if (!nop) return;
 
         const response = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakbarubynop?nop=${nop}`);
-        const data = response.data.data;
+        const fotoResponse = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getfotopersil/${nop}`);
 
+        const imageUrls = fotoResponse.data.imageUrls;
+        const data = response.data.data;
         setSpopData(data.dat_op_pajak);
         setLspopData(data.dat_op_bangunan);
         setWajibPajak(data.wajib_pajak);
         setLatitude(data.dat_op_pajak.latitude);
         setLongitude(data.dat_op_pajak.longitude);
+        if (data.dat_op_pajak.foto_op.length === 0 && imageUrls.length !== 0) {
+          setSpopData((prev: any) => ({
+            ...prev,
+            foto_op: imageUrls,
+          }));
+        }
       } catch (err) {
         console.error("Error fetching data for edit:", err);
       } finally {

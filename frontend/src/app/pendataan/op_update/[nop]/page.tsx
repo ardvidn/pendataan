@@ -42,12 +42,22 @@ export default function UpdateNOPForm() {
         // Selalu ambil data dari pendataan jika dari edit button
         if (isFromEdit) {
           const response = await axios.get<ResponseData>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getoppajakupdatebynop?nop=${paramsNOP.nop}`);
+          const fotoResponse = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getfotopersil/${paramsNOP.nop}`);
+          const imageUrls = fotoResponse.data.imageUrls;
+
           const data = response.data.data;
           setSpopData(data.dat_op_pajak);
           setLspopData(data.dat_op_bangunan);
           setWajibPajak(data.wajib_pajak);
           setLatitude(data.dat_op_pajak.latitude);
           setLongitude(data.dat_op_pajak.longitude);
+
+          if (data.dat_op_pajak.foto_op.length === 0 && imageUrls.length !== 0) {
+            setSpopData((prev: any) => ({
+              ...prev,
+              foto_op: imageUrls,
+            }));
+          }
           return;
         }
         // Hanya ambil data PBB jika bukan dari edit button
@@ -67,6 +77,7 @@ export default function UpdateNOPForm() {
         if (!spopData.foto_op || spopData.dat_op_pajak.foto_op.length === 0) {
           const fotoResponse = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getfotopersil/${paramsNOP.nop}`);
           const imageUrls = fotoResponse.data.imageUrls;
+          console.log(imageUrls);
 
           if (fotoResponse.data.isEmpty === true) {
             return;
