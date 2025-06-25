@@ -29,9 +29,10 @@ export default function UpdateNOPForm() {
   const [isSpopValidB, setIsSpopValidB] = useState(false);
   const [isLspopValid, setIsLspopValid] = useState(false);
   const [isGeoValid, setIsGeoValid] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [deletedLinks, setDeletedLinks] = useState<string[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const paramsNOP = useParams<{ nop: string }>();
   const isTanahKosong = spopData?.jns_bumi === "3";
   const isFromEdit = searchParams.get("source") === "edit";
@@ -46,18 +47,29 @@ export default function UpdateNOPForm() {
           const imageUrls = fotoResponse.data.imageUrls;
 
           const data = response.data.data;
+
           setSpopData(data.dat_op_pajak);
           setLspopData(data.dat_op_bangunan);
           setWajibPajak(data.wajib_pajak);
           setLatitude(data.dat_op_pajak.latitude);
           setLongitude(data.dat_op_pajak.longitude);
 
-          if (data.dat_op_pajak.foto_op.length === 0 && imageUrls.length !== 0) {
+          // Jika foto_op masih null/undefined, set menjadi []
+          if (!data.dat_op_pajak.foto_op) {
+            setSpopData((prev: any) => ({
+              ...prev,
+              foto_op: [],
+            }));
+          }
+
+          // Setelah itu, baru lakukan pengecekan panjang dan update jika perlu
+          if ((!data.dat_op_pajak.foto_op || data.dat_op_pajak.foto_op.length === 0) && imageUrls.length !== 0) {
             setSpopData((prev: any) => ({
               ...prev,
               foto_op: imageUrls,
             }));
           }
+
           return;
         }
         // Hanya ambil data PBB jika bukan dari edit button
@@ -70,14 +82,12 @@ export default function UpdateNOPForm() {
           setWajibPajak(data.wajib_pajak);
           setLatitude(data.dat_op_pajak.latitude);
           setLongitude(data.dat_op_pajak.longitude);
-          console.log(response.data.data);
         }
 
         // Fallback jika foto_op kosong
         if (!spopData.foto_op || spopData.dat_op_pajak.foto_op.length === 0) {
           const fotoResponse = await axios.get<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/get/getfotopersil/${paramsNOP.nop}`);
           const imageUrls = fotoResponse.data.imageUrls;
-          console.log(imageUrls);
 
           if (fotoResponse.data.isEmpty === true) {
             return;
@@ -120,6 +130,60 @@ export default function UpdateNOPForm() {
     return true;
   };
 
+  // Fungsi bantu: menentukan index foto berikutnya yang belum terpakai
+  const getNextFotoIndex = (existingUrls: string[], nop: string) => {
+    const usedIndexes = existingUrls
+      .map((url) => {
+        const match = url.match(new RegExp(`${nop}_(\\d+)\\.`));
+        return match ? parseInt(match[1]) : null;
+      })
+      .filter((x) => x !== null);
+
+    for (let i = 1; i <= 2; i++) {
+      if (!usedIndexes.includes(i)) return i;
+    }
+    return null; // sudah penuh
+  };
+
+  // const handleNext = async () => {
+  //   if (!isCurrentStepValid()) {
+  //     toast.error("Mohon lengkapi data pada step ini sebelum melanjutkan.");
+  //     return;
+  //   }
+
+  //   const isLastStep = isTanahKosong ? activeStep === steps.length - 1 : activeStep === steps.length - 1;
+
+  //   if (isLastStep) {
+  //     const updatedSpopData = {
+  //       ...spopData,
+  //       user_pelayanan: username,
+  //       kd_jns_pelayanan: "12",
+  //       kd_pelayanan: "2",
+  //       log_by: username,
+  //     };
+  //     const payload = preparePayload(updatedSpopData, lspopData, wajibPajak, latitude, longitude, paramsNOP.nop);
+
+  //     try {
+  //       const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopupdate?nop=${paramsNOP.nop}`, payload);
+  //       if (response.status === 200) {
+  //         toast.success(`Berhasil mengunggah op update`);
+
+  //         router.push(`/pendataan/op_update`);
+  //       } else {
+  //         toast.error(`Terjadi kesalahan saat mengunggah op update`);
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   } else {
+  //     if (isTanahKosong && activeStep === 0) {
+  //       setActiveStep((prev) => prev + 2);
+  //     } else {
+  //       setActiveStep((prev) => prev + 1);
+  //     }
+  //   }
+  // };
+
   const handleNext = async () => {
     if (!isCurrentStepValid()) {
       toast.error("Mohon lengkapi data pada step ini sebelum melanjutkan.");
@@ -136,19 +200,58 @@ export default function UpdateNOPForm() {
         kd_pelayanan: "2",
         log_by: username,
       };
-      const payload = preparePayload(updatedSpopData, lspopData, wajibPajak, latitude, longitude, paramsNOP.nop);
 
       try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopupdate?nop=${paramsNOP.nop}`, payload);
-        if (response.status === 200) {
-          toast.success(`Berhasil mengunggah op update`);
+        // === 1. Upload foto baru dari files[]
+        const uploadedUrls: string[] = [...(spopData.foto_op || [])];
+        for (const file of files) {
+          const nextIndex = getNextFotoIndex(spopData.foto_op || [], paramsNOP.nop);
+          if (!nextIndex) {
+            toast.error("Sudah mencapai batas maksimum 2 foto");
+            break;
+          }
 
+          const formData = new FormData();
+          formData.append("fotopersil", file);
+
+          const uploadResponse = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${paramsNOP.nop}?count=${nextIndex - 1}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+
+          const newUrls = uploadResponse.data.imageUrls;
+          if (Array.isArray(newUrls)) {
+            const filteredNewUrls = newUrls.filter((url: string) => !uploadedUrls.includes(url));
+            uploadedUrls.push(...filteredNewUrls);
+          }
+        }
+
+        // Simpan hasil akhir ke spopData
+        const finalSpopData = {
+          ...updatedSpopData,
+          foto_op: uploadedUrls,
+        };
+
+        // === 2. Hapus foto yang dihapus user (dari AWS dan spopData sebelumnya)
+        for (const url of deletedLinks) {
+          const match = url.match(/\/fotopersil\/(.+)\.(jpg|jpeg|png)$/);
+          const publicId = match ? match[1] : null;
+          if (publicId) {
+            await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${publicId}`);
+          }
+        }
+
+        // === 3. Submit data objek pajak
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopupdate?nop=${paramsNOP.nop}`, preparePayload(finalSpopData, lspopData, wajibPajak, latitude, longitude, paramsNOP.nop));
+
+        if (response.status === 200) {
+          toast.success("Berhasil mengunggah op update");
           router.push(`/pendataan/op_update`);
         } else {
-          toast.error(`Terjadi kesalahan saat mengunggah op update`);
+          toast.error("Terjadi kesalahan saat mengunggah op update");
         }
       } catch (error) {
-        console.log(error);
+        console.error("Submit error:", error);
+        toast.error("Terjadi kesalahan saat submit data");
       }
     } else {
       if (isTanahKosong && activeStep === 0) {
@@ -207,7 +310,20 @@ export default function UpdateNOPForm() {
           </Box>
 
           {activeStep === 0 && (
-            <SPOPForm nop={paramsNOP.nop} spopData={spopData} setSpopData={setSpopData} isLoading={isLoading} wajibPajak={wajibPajak} setWajibPajak={setWajibPajak} onValidityChange={setIsSpopValid} onValidityChangeB={setIsSpopValidB} />
+            <SPOPForm
+              nop={paramsNOP.nop}
+              spopData={spopData}
+              setSpopData={setSpopData}
+              isLoading={isLoading}
+              wajibPajak={wajibPajak}
+              setWajibPajak={setWajibPajak}
+              onValidityChange={setIsSpopValid}
+              onValidityChangeB={setIsSpopValidB}
+              files={files}
+              setFiles={setFiles}
+              deletedLinks={deletedLinks}
+              setDeletedLinks={setDeletedLinks}
+            />
           )}
 
           {activeStep === 1 && !isTanahKosong && <LSPOPForm nop={paramsNOP.nop} lspopData={lspopData} setLspopData={setLspopData} onValidityChange={setIsLspopValid} />}

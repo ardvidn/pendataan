@@ -27,6 +27,8 @@ const FormOpBaru = () => {
   const [isSpopValidB, setIsSpopValidB] = useState(false);
   const [isLspopValid, setIsLspopValid] = useState(false);
   const [isGeoValid, setIsGeoValid] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [deletedLinks, setDeletedLinks] = useState<string[]>([]);
   const [kdKecBaru, setKdKecBaru] = useState("");
   const [kdKelBaru, setKdKelBaru] = useState("");
   const [kdBlokBaru, setKdBlokBaru] = useState("");
@@ -131,6 +133,21 @@ const FormOpBaru = () => {
       .catch(() => router.push("/login"));
   }, [router]);
 
+  // Fungsi bantu: menentukan index foto berikutnya yang belum terpakai
+  const getNextFotoIndex = (existingUrls: string[], nop: string) => {
+    const usedIndexes = existingUrls
+      .map((url) => {
+        const match = url.match(new RegExp(`${nop}_(\\d+)\\.`));
+        return match ? parseInt(match[1]) : null;
+      })
+      .filter((x) => x !== null);
+
+    for (let i = 1; i <= 2; i++) {
+      if (!usedIndexes.includes(i)) return i;
+    }
+    return null; // sudah penuh
+  };
+
   const handleNext = async () => {
     if (!isCurrentStepValid()) {
       toast.error("Mohon lengkapi data pada step ini sebelum melanjutkan.");
@@ -148,21 +165,59 @@ const FormOpBaru = () => {
         log_by: username,
         jns_transaksi_op: "1",
       };
-      const payload = preparePayload(updatedSpopData, lspopData, wajibPajak, latitude, longitude, nopBaru);
 
       try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopbaru?nop=${nop}`, payload);
-        if (response.status === 200) {
-          toast.success(`Berhasil mengunggah op baru`);
+        // === 1. Upload foto baru dari files[]
+        const uploadedUrls: string[] = [...(spopData.foto_op || [])];
+        for (const file of files) {
+          const nextIndex = getNextFotoIndex(spopData.foto_op || [], nop);
+          if (!nextIndex) {
+            toast.error("Sudah mencapai batas maksimum 2 foto");
+            break;
+          }
 
-          router.push(`/pendataan/op_baru`);
+          const formData = new FormData();
+          formData.append("fotopersil", file);
+
+          const uploadResponse = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${nop}?count=${nextIndex - 1}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+
+          const newUrls = uploadResponse.data.imageUrls;
+          if (Array.isArray(newUrls)) {
+            const filteredNewUrls = newUrls.filter((url: string) => !uploadedUrls.includes(url));
+            uploadedUrls.push(...filteredNewUrls);
+          }
+        }
+
+        // Simpan hasil akhir ke spopData
+        const finalSpopData = {
+          ...updatedSpopData,
+          foto_op: uploadedUrls,
+        };
+
+        // === 2. Hapus foto yang dihapus user (dari AWS dan spopData sebelumnya)
+        for (const url of deletedLinks) {
+          const match = url.match(/\/fotopersil\/(.+)\.(jpg|jpeg|png)$/);
+          const publicId = match ? match[1] : null;
+          if (publicId) {
+            await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${publicId}`);
+          }
+        }
+
+        // === 3. Submit data objek pajak
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopbaru?nop=${nop}`, preparePayload(finalSpopData, lspopData, wajibPajak, latitude, longitude, nop));
+
+        if (response.status === 200) {
+          toast.success("Berhasil mengunggah op update");
+          router.push(`/pendataan/op_update`);
         } else {
-          toast.error(`Terjadi kesalahan saat mengunggah op baru`);
+          toast.error("Terjadi kesalahan saat mengunggah op update");
         }
       } catch (error) {
-        console.log(error);
+        console.error("Submit error:", error);
+        toast.error("Terjadi kesalahan saat submit data");
       }
-      console.log("Submit data:", payload);
     } else {
       if (isTanahKosong && activeStep === 0) {
         setActiveStep((prev) => prev + 2);
@@ -240,6 +295,10 @@ const FormOpBaru = () => {
                 setSelectedKelurahanBaru={setSelectedKelurahanBaru}
                 selectedBlokBaru={selectedBlokBaru}
                 setSelectedBlokBaru={setSelectedBlokBaru}
+                files={files}
+                setFiles={setFiles}
+                deletedLinks={deletedLinks}
+                setDeletedLinks={setDeletedLinks}
               />
             </Box>
           )}

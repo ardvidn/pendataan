@@ -10,6 +10,10 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 interface DataWPdanFotoProps {
+  files: File[];
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  deletedLinks: string[];
+  setDeletedLinks: React.Dispatch<React.SetStateAction<string[]>>;
   nop: string;
   setWajibPajak: React.Dispatch<React.SetStateAction<string[]>>;
   loadingWajibPajak: boolean;
@@ -65,6 +69,10 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
   setSpopData,
   spopData,
   onValidityChange,
+  files,
+  setFiles,
+  deletedLinks,
+  setDeletedLinks,
 }) => {
   useEffect(() => {
     if (wajibPajak.jns_wp === "1") {
@@ -266,7 +274,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                 Foto Objek Pajak
               </Typography>
               <Divider />
-              <UploadFotoPersilBox spopData={spopData} setSpopData={setSpopData} />
+              <UploadFotoPersilBox spopData={spopData} setSpopData={setSpopData} files={files} setFiles={setFiles} deletedLinks={deletedLinks} setDeletedLinks={setDeletedLinks} />
             </Box>
           </>
         ) : (
@@ -452,7 +460,7 @@ const DataWPdanFoto: React.FC<DataWPdanFotoProps> = ({
                 Foto Objek Pajak
               </Typography>
               <Divider />
-              <UploadFotoPersilBox spopData={spopData} setSpopData={setSpopData} />
+              <UploadFotoPersilBox spopData={spopData} setSpopData={setSpopData} files={files} setFiles={setFiles} deletedLinks={deletedLinks} setDeletedLinks={setDeletedLinks} />
             </Box>
           </>
         )}

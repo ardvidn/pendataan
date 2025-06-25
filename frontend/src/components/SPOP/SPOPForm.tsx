@@ -11,6 +11,10 @@ import DataWPdanFoto from "./DataWPdanFoto";
 import { formatNop } from "@/utils/formatNOP";
 
 interface SpopFormProps {
+  files: File[];
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  deletedLinks: string[];
+  setDeletedLinks: React.Dispatch<React.SetStateAction<string[]>>;
   nop: string;
   setSpopData: React.Dispatch<React.SetStateAction<any>>;
   spopData: any;
@@ -21,7 +25,7 @@ interface SpopFormProps {
   onValidityChangeB: (isValid: boolean) => void;
 }
 
-export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, setWajibPajak, onValidityChange, onValidityChangeB }: SpopFormProps) => {
+export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, setWajibPajak, onValidityChange, onValidityChangeB, files, setFiles, deletedLinks, setDeletedLinks }: SpopFormProps) => {
   const [showLahanKeterangan, setShowLahanKeterangan] = useState(false);
   const [provinsiOptions, setProvinsiOptions] = useState<string[]>([]);
 
@@ -290,6 +294,10 @@ export const SPOPForm = ({ nop, setSpopData, spopData, isLoading, wajibPajak, se
             rawInputWajibPajak={rawInputWajibPajak}
             wajibPajak={wajibPajak}
             onValidityChange={onValidityChange}
+            files={files}
+            setFiles={setFiles}
+            deletedLinks={deletedLinks}
+            setDeletedLinks={setDeletedLinks}
           />
         </Box>
       </Box>

@@ -167,17 +167,36 @@ export const DeleteFotoPersil = async (req: Request, res: Response) => {
     const { publicId } = req.params;
     if (!publicId) return res.status(400).json({ message: "publicId is required" });
 
-    const key = `${publicId.split(".")[0]}.jpg`; // Atau sesuaikan dengan format yang kamu pakai
-    const bucketName = process.env.AWS_S3_BUCKET_NAME;
+    const bucketName = process.env.AWS_S3_BUCKET_NAME!;
+    const prefix = `fotopersil/${publicId}`;
 
-    const command = new DeleteObjectCommand({
+    // 1. Cari file yang cocok (apapun ekstensinya)
+    const listCommand = new ListObjectsV2Command({
       Bucket: bucketName,
-      Key: key,
+      Prefix: prefix, // contoh: fotopersil/620101010101000101_1
+      MaxKeys: 5,
     });
 
-    await s3.send(command);
+    const listResult = await s3.send(listCommand);
+    const target = listResult.Contents?.find((obj) => obj.Key?.startsWith(prefix));
 
-    return res.status(200).json({ code: 200, message: "Image deleted successfully" });
+    if (!target || !target.Key) {
+      return res.status(404).json({ message: "File not found in S3" });
+    }
+
+    // 2. Hapus file
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: bucketName,
+      Key: target.Key,
+    });
+
+    await s3.send(deleteCommand);
+
+    return res.status(200).json({
+      code: 200,
+      message: "Image deleted successfully",
+      deletedKey: target.Key,
+    });
   } catch (error: any) {
     console.error("Delete error:", error);
     return res.status(500).json({ message: error.message || "Internal server error" });

@@ -14,6 +14,10 @@ const fixedProvinsi = "62";
 const fixedKabupaten = "13";
 
 interface SPOPFormBaruProps {
+  files: File[];
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  deletedLinks: string[];
+  setDeletedLinks: React.Dispatch<React.SetStateAction<string[]>>;
   isFromEdit?: boolean;
   nop?: string;
   spopData: any;
@@ -58,6 +62,10 @@ const SPOPFormBaru: React.FC<SPOPFormBaruProps> = ({
   selectedKecamatanBaru,
   selectedKelurahanBaru,
   selectedBlokBaru,
+  files,
+  setFiles,
+  deletedLinks,
+  setDeletedLinks,
 }) => {
   const [kecamatanOptionsBaru, setKecamatanOptionsBaru] = useState<any[]>([]);
   const [kelurahanOptionsBaru, setKelurahanOptionsBaru] = useState<any[]>([]);
@@ -371,6 +379,10 @@ const SPOPFormBaru: React.FC<SPOPFormBaruProps> = ({
           rawInputWajibPajak={rawInputWajibPajak}
           wajibPajak={wajibPajak}
           onValidityChange={onValidityChange}
+          files={files}
+          setFiles={setFiles}
+          deletedLinks={deletedLinks}
+          setDeletedLinks={setDeletedLinks}
         />
       </Box>
     </>
