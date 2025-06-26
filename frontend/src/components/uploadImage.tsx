@@ -261,10 +261,115 @@
 // export default UploadFotoPersilBox;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// "use client";
+
+// import { Box, Typography, Paper, IconButton } from "@mui/material";
+// import React from "react";
+// import { useDropzone } from "react-dropzone";
+// import ImageIcon from "@mui/icons-material/Image";
+// import DeleteIcon from "@mui/icons-material/Delete";
+// import toast, { Toaster } from "react-hot-toast";
+// import Image from "next/image";
+
+// interface UploadFotoPersilBoxProps {
+//   files: File[];
+//   setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+//   spopData: any;
+//   setSpopData: React.Dispatch<React.SetStateAction<any>>;
+//   deletedLinks: string[];
+//   setDeletedLinks: React.Dispatch<React.SetStateAction<string[]>>;
+// }
+
+// const dropzoneStyle = (disabled: boolean) => ({
+//   border: "2px dashed green",
+//   borderRadius: "8px",
+//   padding: "20px",
+//   textAlign: "center" as const,
+//   cursor: disabled ? "not-allowed" : "pointer",
+//   backgroundColor: disabled ? "#e0e0e0" : "#f9f9f9",
+//   display: "flex",
+//   flexDirection: "column" as const,
+//   alignItems: "center" as const,
+//   pointerEvents: disabled ? "none" : "auto",
+// });
+
+// const UploadFotoPersilBox: React.FC<UploadFotoPersilBoxProps> = ({ files, setFiles, spopData, setSpopData, deletedLinks, setDeletedLinks }) => {
+//   const isUploading = false; // karena upload dilakukan saat submit di parent
+
+//   const existingLinks = spopData.foto_op?.filter((url: string) => !deletedLinks.includes(url)) || [];
+//   const totalImages = existingLinks.length + files.length;
+//   const combinedPreviews = [...existingLinks, ...files];
+
+//   const { getRootProps, getInputProps } = useDropzone({
+//     accept: { "image/*": [] },
+//     multiple: true,
+//     maxFiles: 2 - totalImages,
+//     onDrop: (acceptedFiles) => {
+//       const remainingSlots = 2 - totalImages;
+//       const newFiles = acceptedFiles.slice(0, remainingSlots);
+//       setFiles((prev) => [...prev, ...newFiles]);
+//       toast.success(`${newFiles.length} foto ditambahkan`);
+//     },
+//     disabled: totalImages >= 2,
+//   });
+
+//   return (
+//     <Paper elevation={3} sx={{ p: 3, borderRadius: 2, backgroundColor: "#fff", mt: 4 }}>
+//       <Toaster position="top-center" />
+
+//       {totalImages < 2 && (
+//         <Box {...getRootProps()} sx={dropzoneStyle(isUploading)}>
+//           <input {...getInputProps()} />
+//           <ImageIcon sx={{ fontSize: 50, color: "green" }} />
+//           <Typography variant="body2">Drag & drop maksimal 2 gambar, atau klik untuk memilih</Typography>
+//         </Box>
+//       )}
+
+//       {combinedPreviews.length > 0 && (
+//         <Box mt={2} display="flex" flexWrap="wrap" gap={2} justifyContent="center">
+//           {combinedPreviews.map((item, index) => (
+//             <Box key={index} position="relative">
+//               <Image src={typeof item === "string" ? item : URL.createObjectURL(item)} alt={`Preview ${index + 1}`} width={400} height={300} style={{ borderRadius: 8, objectFit: "cover" }} />
+//               <IconButton
+//                 onClick={() => {
+//                   if (typeof item === "string") {
+//                     // Hapus link dari foto_op dan tandai untuk delete
+//                     setDeletedLinks((prev) => [...prev, item]);
+//                     setSpopData((prev: any) => ({
+//                       ...prev,
+//                       foto_op: prev.foto_op.filter((url: string) => url !== item),
+//                     }));
+//                     toast.success("Foto (link) dihapus");
+//                   } else {
+//                     // Hapus file dari files
+//                     setFiles((prev) => prev.filter((_, i) => i !== index - existingLinks.length));
+//                     toast.success("Foto (file) dihapus");
+//                   }
+//                 }}
+//                 sx={{
+//                   position: "absolute",
+//                   top: 8,
+//                   right: 8,
+//                   backgroundColor: "#fff",
+//                   "&:hover": { backgroundColor: "#f2f2f2" },
+//                 }}
+//               >
+//                 <DeleteIcon color="error" />
+//               </IconButton>
+//             </Box>
+//           ))}
+//         </Box>
+//       )}
+//     </Paper>
+//   );
+// };
+
+// export default UploadFotoPersilBox;
+
 "use client";
 
 import { Box, Typography, Paper, IconButton } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import ImageIcon from "@mui/icons-material/Image";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -300,15 +405,41 @@ const UploadFotoPersilBox: React.FC<UploadFotoPersilBoxProps> = ({ files, setFil
   const totalImages = existingLinks.length + files.length;
   const combinedPreviews = [...existingLinks, ...files];
 
+  useEffect(() => {
+    return () => {
+      files.forEach((file) => URL.revokeObjectURL(URL.createObjectURL(file)));
+    };
+  }, [files]);
+
   const { getRootProps, getInputProps } = useDropzone({
     accept: { "image/*": [] },
     multiple: true,
-    maxFiles: 2 - totalImages,
+    maxFiles: 2,
     onDrop: (acceptedFiles) => {
-      const remainingSlots = 2 - totalImages;
+      const existingCount = existingLinks.length;
+      const currentCount = files.length;
+      const total = existingCount + currentCount;
+
+      const remainingSlots = 2 - total;
+      if (remainingSlots <= 0) {
+        toast.error("Maksimal hanya 2 foto yang diizinkan.");
+        return;
+      }
+
       const newFiles = acceptedFiles.slice(0, remainingSlots);
-      setFiles((prev) => [...prev, ...newFiles]);
-      toast.success(`${newFiles.length} foto ditambahkan`);
+
+      // Hindari file duplikat berdasarkan nama
+      const existingNames = new Set(files.map((f) => f.name));
+      const uniqueFiles = newFiles.filter((f) => !existingNames.has(f.name));
+
+      if (uniqueFiles.length > 0) {
+        setFiles((prev) => [...prev, ...uniqueFiles]);
+        toast.success(`${uniqueFiles.length} foto ditambahkan`);
+      }
+
+      if (acceptedFiles.length > uniqueFiles.length) {
+        toast.error("Beberapa foto duplikat tidak ditambahkan.");
+      }
     },
     disabled: totalImages >= 2,
   });
@@ -333,7 +464,6 @@ const UploadFotoPersilBox: React.FC<UploadFotoPersilBoxProps> = ({ files, setFil
               <IconButton
                 onClick={() => {
                   if (typeof item === "string") {
-                    // Hapus link dari foto_op dan tandai untuk delete
                     setDeletedLinks((prev) => [...prev, item]);
                     setSpopData((prev: any) => ({
                       ...prev,
@@ -341,8 +471,8 @@ const UploadFotoPersilBox: React.FC<UploadFotoPersilBoxProps> = ({ files, setFil
                     }));
                     toast.success("Foto (link) dihapus");
                   } else {
-                    // Hapus file dari files
-                    setFiles((prev) => prev.filter((_, i) => i !== index - existingLinks.length));
+                    const fileIndex = index - existingLinks.length;
+                    setFiles((prev) => prev.filter((_, i) => i !== fileIndex));
                     toast.success("Foto (file) dihapus");
                   }
                 }}

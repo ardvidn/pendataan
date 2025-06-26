@@ -210,7 +210,7 @@ const FormOpBaru = () => {
 
         if (response.status === 200) {
           toast.success("Berhasil mengunggah op update");
-          router.push(`/pendataan/op_update`);
+          router.push(`/pendataan/op_baru`);
         } else {
           toast.error("Terjadi kesalahan saat mengunggah op update");
         }
