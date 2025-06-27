@@ -161,19 +161,86 @@ export default function UpdateNOPForm() {
   //       kd_pelayanan: "2",
   //       log_by: username,
   //     };
-  //     const payload = preparePayload(updatedSpopData, lspopData, wajibPajak, latitude, longitude, paramsNOP.nop);
 
   //     try {
-  //       const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopupdate?nop=${paramsNOP.nop}`, payload);
-  //       if (response.status === 200) {
-  //         toast.success(`Berhasil mengunggah op update`);
+  //       const uploadedUrls: string[] = [...(spopData.foto_op || [])];
 
+  //       // === 1. Hapus foto lama yang ditandai (dan siapkan untuk diganti)
+  //       const replacementMap: Record<string, File> = {};
+
+  //       for (const url of deletedLinks) {
+  //         const match = url.match(/\/fotopersil\/(.+)\.(jpg|jpeg|png|webp|bmp|gif)$/);
+  //         const publicId = match ? match[1] : null;
+  //         if (!publicId) continue;
+
+  //         // Cari file pengganti (jika ada)
+  //         const replacementFile = files.shift(); // ambil satu file dari antrian files
+  //         if (replacementFile) {
+  //           replacementMap[publicId] = replacementFile;
+
+  //           // Hapus dari AWS (jika perlu)
+  //           await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${publicId}`);
+  //         }
+
+  //         // Hapus link lama dari array
+  //         const oldIndex = uploadedUrls.findIndex((u) => u === url);
+  //         if (oldIndex !== -1) {
+  //           uploadedUrls.splice(oldIndex, 1); // hapus dari array link
+  //         }
+  //       }
+
+  //       // === 2. Upload file pengganti (dengan nama yang sama)
+  //       for (const [publicId, file] of Object.entries(replacementMap)) {
+  //         const formData = new FormData();
+  //         formData.append("fotopersil", file);
+
+  //         const uploadRes = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${paramsNOP.nop}?forceName=${publicId}`, formData, {
+  //           headers: { "Content-Type": "multipart/form-data" },
+  //         });
+
+  //         const [newUrl] = uploadRes.data.imageUrls || [];
+
+  //         if (newUrl) {
+  //           uploadedUrls.push(newUrl); // Tambahkan kembali ke daftar
+  //         }
+  //       }
+
+  //       // === 3. Upload file baru lainnya (jika masih ada slot)
+  //       for (const file of files) {
+  //         const nextIndex = getNextFotoIndex(uploadedUrls, paramsNOP.nop);
+  //         if (!nextIndex) {
+  //           toast.error("Sudah mencapai batas maksimum 2 foto");
+  //           break;
+  //         }
+
+  //         const formData = new FormData();
+  //         formData.append("fotopersil", file);
+
+  //         const uploadResponse = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${paramsNOP.nop}?count=${nextIndex - 1}`, formData, {
+  //           headers: { "Content-Type": "multipart/form-data" },
+  //         });
+
+  //         const newUrls = uploadResponse.data.imageUrls || [];
+  //         uploadedUrls.push(...newUrls.filter((url: any) => !uploadedUrls.includes(url)));
+  //       }
+
+  //       // === 4. Submit data akhir
+  //       const finalSpopData = {
+  //         ...updatedSpopData,
+  //         foto_op: uploadedUrls,
+  //       };
+
+  //       const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopupdate?nop=${paramsNOP.nop}`, preparePayload(finalSpopData, lspopData, wajibPajak, latitude, longitude, paramsNOP.nop));
+
+  //       if (response.status === 200) {
+  //         toast.success("Berhasil mengunggah op update");
   //         router.push(`/pendataan/op_update`);
   //       } else {
-  //         toast.error(`Terjadi kesalahan saat mengunggah op update`);
+  //         toast.error("Terjadi kesalahan saat mengunggah op update");
   //       }
   //     } catch (error) {
-  //       console.log(error);
+  //       console.error("Submit error:", error);
+  //       toast.error("Terjadi kesalahan saat submit data");
   //     }
   //   } else {
   //     if (isTanahKosong && activeStep === 0) {
@@ -202,10 +269,45 @@ export default function UpdateNOPForm() {
       };
 
       try {
-        // === 1. Upload foto baru dari files[]
         const uploadedUrls: string[] = [...(spopData.foto_op || [])];
+        const replacementMap: Record<string, File> = {};
+
+        // === 1. Hapus foto dari AWS dan `foto_op` (dengan atau tanpa pengganti)
+        for (const url of deletedLinks) {
+          const match = url.match(/\/fotopersil\/(.+)\.(jpg|jpeg|png|webp|bmp|gif)$/);
+          const publicId = match ? match[1] : null;
+          if (!publicId) continue;
+
+          // Hapus dari AWS
+          await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${publicId}`);
+
+          // Hapus dari foto_op
+          const index = uploadedUrls.indexOf(url);
+          if (index !== -1) uploadedUrls.splice(index, 1);
+
+          // Siapkan pengganti jika ada
+          const replacementFile = files.shift();
+          if (replacementFile) {
+            replacementMap[publicId] = replacementFile;
+          }
+        }
+
+        // === 2. Upload foto pengganti (jika ada) dengan nama yang sama
+        for (const [publicId, file] of Object.entries(replacementMap)) {
+          const formData = new FormData();
+          formData.append("fotopersil", file);
+
+          const res = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${paramsNOP.nop}?forceName=${publicId}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+
+          const [newUrl] = res.data.imageUrls || [];
+          if (newUrl) {
+            uploadedUrls.push(newUrl);
+          }
+        }
+
+        // === 3. Upload file baru (jika masih ada slot)
         for (const file of files) {
-          const nextIndex = getNextFotoIndex(spopData.foto_op || [], paramsNOP.nop);
+          const nextIndex = getNextFotoIndex(uploadedUrls, paramsNOP.nop);
           if (!nextIndex) {
             toast.error("Sudah mencapai batas maksimum 2 foto");
             break;
@@ -214,33 +316,18 @@ export default function UpdateNOPForm() {
           const formData = new FormData();
           formData.append("fotopersil", file);
 
-          const uploadResponse = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${paramsNOP.nop}?count=${nextIndex - 1}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
+          const res = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${paramsNOP.nop}?count=${nextIndex - 1}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
 
-          const newUrls = uploadResponse.data.imageUrls;
-          if (Array.isArray(newUrls)) {
-            const filteredNewUrls = newUrls.filter((url: string) => !uploadedUrls.includes(url));
-            uploadedUrls.push(...filteredNewUrls);
-          }
+          const newUrls = res.data.imageUrls || [];
+          uploadedUrls.push(...newUrls.filter((u: any) => !uploadedUrls.includes(u)));
         }
 
-        // Simpan hasil akhir ke spopData
+        // === 4. Submit spopData
         const finalSpopData = {
           ...updatedSpopData,
           foto_op: uploadedUrls,
         };
 
-        // === 2. Hapus foto yang dihapus user (dari AWS dan spopData sebelumnya)
-        for (const url of deletedLinks) {
-          const match = url.match(/\/fotopersil\/(.+)\.(jpg|jpeg|png)$/);
-          const publicId = match ? match[1] : null;
-          if (publicId) {
-            await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${publicId}`);
-          }
-        }
-
-        // === 3. Submit data objek pajak
         const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopupdate?nop=${paramsNOP.nop}`, preparePayload(finalSpopData, lspopData, wajibPajak, latitude, longitude, paramsNOP.nop));
 
         if (response.status === 200) {
@@ -249,9 +336,9 @@ export default function UpdateNOPForm() {
         } else {
           toast.error("Terjadi kesalahan saat mengunggah op update");
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Submit error:", error);
-        toast.error("Terjadi kesalahan saat submit data");
+        toast.error(`Terjadi kesalahan saat submit data: ${error.response.data.message}`);
       }
     } else {
       if (isTanahKosong && activeStep === 0) {
@@ -275,6 +362,8 @@ export default function UpdateNOPForm() {
   };
 
   if (isLoading) return <Typography>Loading...</Typography>;
+
+  console.log(files);
 
   return (
     <>

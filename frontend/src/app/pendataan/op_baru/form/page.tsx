@@ -27,6 +27,8 @@ const FormOpBaru = () => {
   const [isSpopValidB, setIsSpopValidB] = useState(false);
   const [isLspopValid, setIsLspopValid] = useState(false);
   const [isGeoValid, setIsGeoValid] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [deletedLinks, setDeletedLinks] = useState<string[]>([]);
   const [kdKecBaru, setKdKecBaru] = useState("");
   const [kdKelBaru, setKdKelBaru] = useState("");
   const [kdBlokBaru, setKdBlokBaru] = useState("");
@@ -96,6 +98,21 @@ const FormOpBaru = () => {
       .catch(() => router.push("/login"));
   }, [router]);
 
+  // Fungsi bantu: menentukan index foto berikutnya yang belum terpakai
+  const getNextFotoIndex = (existingUrls: string[], nop: string) => {
+    const usedIndexes = existingUrls
+      .map((url) => {
+        const match = url.match(new RegExp(`${nop}_(\\d+)\\.`));
+        return match ? parseInt(match[1]) : null;
+      })
+      .filter((x) => x !== null);
+
+    for (let i = 1; i <= 2; i++) {
+      if (!usedIndexes.includes(i)) return i;
+    }
+    return null; // sudah penuh
+  };
+
   const handleNext = async () => {
     if (!isCurrentStepValid()) {
       toast.error("Mohon lengkapi data pada step ini sebelum melanjutkan.");
@@ -113,21 +130,83 @@ const FormOpBaru = () => {
         log_by: username,
         jns_transaksi_op: "1",
       };
-      const payload = preparePayload(updatedSpopData, lspopData, wajibPajak, latitude, longitude, nopBaru);
 
       try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopbaru?nop=${nopBaru}`, payload);
-        if (response.status === 200) {
-          toast.success(`Berhasil mengunggah op baru`);
+        const uploadedUrls: string[] = [...(spopData.foto_op || [])];
+        const replacementMap: Record<string, File> = {};
 
+        // === 1. Hapus foto lama yang ditandai (dan siapkan untuk diganti)
+        for (const url of deletedLinks) {
+          const match = url.match(/\/fotopersil\/(.+)\.(jpg|jpeg|png|webp|bmp|gif)$/);
+          const publicId = match ? match[1] : null;
+          if (!publicId) continue;
+
+          // Hapus dari AWS
+          await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${publicId}`);
+
+          // Hapus dari foto_op
+          const index = uploadedUrls.indexOf(url);
+          if (index !== -1) uploadedUrls.splice(index, 1);
+
+          // Cari file pengganti (jika ada)
+          const replacementFile = files.shift(); // ambil satu file dari antrian files
+          if (replacementFile) {
+            replacementMap[publicId] = replacementFile;
+          }
+        }
+
+        // === 2. Upload file pengganti (dengan nama yang sama)
+        for (const [publicId, file] of Object.entries(replacementMap)) {
+          const formData = new FormData();
+          formData.append("fotopersil", file);
+
+          const uploadRes = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${nopBaru}?forceName=${publicId}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+
+          const [newUrl] = uploadRes.data.imageUrls || [];
+          if (newUrl) {
+            uploadedUrls.push(newUrl); // Tambahkan kembali ke daftar
+          }
+        }
+
+        // === 3. Upload file baru lainnya (jika masih ada slot)
+        for (const file of files) {
+          const nextIndex = getNextFotoIndex(uploadedUrls, nopBaru);
+          if (!nextIndex) {
+            toast.error("Sudah mencapai batas maksimum 2 foto");
+            break;
+          }
+
+          const formData = new FormData();
+          formData.append("fotopersil", file);
+
+          const uploadResponse = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${nopBaru}?count=${nextIndex - 1}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+
+          const newUrls = uploadResponse.data.imageUrls || [];
+          uploadedUrls.push(...newUrls.filter((url: any) => !uploadedUrls.includes(url)));
+        }
+
+        // === 4. Submit data akhir
+        const finalSpopData = {
+          ...updatedSpopData,
+          foto_op: uploadedUrls,
+        };
+
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopbaru?nop=${nopBaru}`, preparePayload(finalSpopData, lspopData, wajibPajak, latitude, longitude, nopBaru));
+
+        if (response.status === 200) {
+          toast.success("Berhasil mengunggah op baru");
           router.push(`/pendataan/op_baru`);
         } else {
-          toast.error(`Terjadi kesalahan saat mengunggah op baru`);
+          toast.error("Terjadi kesalahan saat mengunggah op baru");
         }
-      } catch (error) {
-        console.log(error);
+      } catch (error: any) {
+        console.error("Submit error:", error);
+        toast.error(`Terjadi kesalahan saat submit data: ${error.response.data.message}`);
       }
-      console.log("Submit data:", payload);
     } else {
       if (isTanahKosong && activeStep === 0) {
         setActiveStep((prev) => prev + 2);
@@ -203,6 +282,10 @@ const FormOpBaru = () => {
                 setSelectedKelurahanBaru={setSelectedKelurahanBaru}
                 selectedBlokBaru={selectedBlokBaru}
                 setSelectedBlokBaru={setSelectedBlokBaru}
+                files={files}
+                setFiles={setFiles}
+                deletedLinks={deletedLinks}
+                setDeletedLinks={setDeletedLinks}
               />
             </Box>
           )}

@@ -167,10 +167,48 @@ const FormOpBaru = () => {
       };
 
       try {
-        // === 1. Upload foto baru dari files[]
         const uploadedUrls: string[] = [...(spopData.foto_op || [])];
+        const replacementMap: Record<string, File> = {};
+
+        // === 1. Hapus foto lama yang ditandai (dan siapkan untuk diganti)
+
+        for (const url of deletedLinks) {
+          const match = url.match(/\/fotopersil\/(.+)\.(jpg|jpeg|png|webp|bmp|gif)$/);
+          const publicId = match ? match[1] : null;
+          if (!publicId) continue;
+
+          // Hapus dari AWS
+          await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${publicId}`);
+
+          // Hapus dari foto_op
+          const index = uploadedUrls.indexOf(url);
+          if (index !== -1) uploadedUrls.splice(index, 1);
+
+          // Cari file pengganti (jika ada)
+          const replacementFile = files.shift(); // ambil satu file dari antrian files
+          if (replacementFile) {
+            replacementMap[publicId] = replacementFile;
+          }
+        }
+
+        // === 2. Upload file pengganti (dengan nama yang sama)
+        for (const [publicId, file] of Object.entries(replacementMap)) {
+          const formData = new FormData();
+          formData.append("fotopersil", file);
+
+          const uploadRes = await axios.post<any>(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/fotoobjekpajak/${nop}?forceName=${publicId}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+
+          const [newUrl] = uploadRes.data.imageUrls || [];
+          if (newUrl) {
+            uploadedUrls.push(newUrl); // Tambahkan kembali ke daftar
+          }
+        }
+
+        // === 3. Upload file baru lainnya (jika masih ada slot)
         for (const file of files) {
-          const nextIndex = getNextFotoIndex(spopData.foto_op || [], nop);
+          const nextIndex = getNextFotoIndex(uploadedUrls, nop);
           if (!nextIndex) {
             toast.error("Sudah mencapai batas maksimum 2 foto");
             break;
@@ -183,40 +221,27 @@ const FormOpBaru = () => {
             headers: { "Content-Type": "multipart/form-data" },
           });
 
-          const newUrls = uploadResponse.data.imageUrls;
-          if (Array.isArray(newUrls)) {
-            const filteredNewUrls = newUrls.filter((url: string) => !uploadedUrls.includes(url));
-            uploadedUrls.push(...filteredNewUrls);
-          }
+          const newUrls = uploadResponse.data.imageUrls || [];
+          uploadedUrls.push(...newUrls.filter((url: any) => !uploadedUrls.includes(url)));
         }
 
-        // Simpan hasil akhir ke spopData
+        // === 4. Submit data akhir
         const finalSpopData = {
           ...updatedSpopData,
           foto_op: uploadedUrls,
         };
 
-        // === 2. Hapus foto yang dihapus user (dari AWS dan spopData sebelumnya)
-        for (const url of deletedLinks) {
-          const match = url.match(/\/fotopersil\/(.+)\.(jpg|jpeg|png)$/);
-          const publicId = match ? match[1] : null;
-          if (publicId) {
-            await axios.delete(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/delete/fotoobjekpajak/${publicId}`);
-          }
-        }
-
-        // === 3. Submit data objek pajak
         const response = await axios.post(`${process.env.NEXT_PUBLIC_PENDATAAN_API_URL}/api/post/inputopbaru?nop=${nop}`, preparePayload(finalSpopData, lspopData, wajibPajak, latitude, longitude, nop));
 
         if (response.status === 200) {
-          toast.success("Berhasil mengunggah op update");
+          toast.success("Berhasil mengunggah op baru");
           router.push(`/pendataan/op_baru`);
         } else {
-          toast.error("Terjadi kesalahan saat mengunggah op update");
+          toast.error("Terjadi kesalahan saat mengunggah op baru");
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Submit error:", error);
-        toast.error("Terjadi kesalahan saat submit data");
+        toast.error(`Terjadi kesalahan saat submit data: ${error.response.data.message}`);
       }
     } else {
       if (isTanahKosong && activeStep === 0) {

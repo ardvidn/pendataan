@@ -374,6 +374,9 @@ const UploadFotoPersilBoxBaru: React.FC<UploadFotoPersilBoxBaruProps> = ({ files
     disabled: totalImages >= 2,
   });
 
+  console.log("ex", spopData.foto_op);
+  console.log("files", files);
+
   return (
     <Paper elevation={3} sx={{ p: 3, borderRadius: 2, backgroundColor: "#fff", mt: 4 }}>
       <Toaster position="top-center" />
